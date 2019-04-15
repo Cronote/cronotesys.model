@@ -89,8 +89,6 @@ public class ActivityVO implements java.io.Serializable {
 		this.estimatedTime = estimatedTime;
 	}
 
-
-
 	@Column(name = "stats", nullable = false)
 	public StatusEnum getStats() {
 		return stats;
@@ -159,16 +157,26 @@ public class ActivityVO implements java.io.Serializable {
 
 	@Transient
 	public String getEstimatedTimeAsString() {
-		long horas = getEstimatedTime().toHours();
-		Duration minutos = getEstimatedTime().minus(horas, ChronoUnit.HOURS);
-		return String.format("%02d:%02d ", horas, minutos.toMinutes());
+		try {
+			long horas = getEstimatedTime().toHours();
+			Duration minutos = getEstimatedTime().minus(horas, ChronoUnit.HOURS);
+			return String.format("%02d:%02d ", horas, minutos.toMinutes());
+		} catch (Exception e) {
+			// TODO: handle exception
+			return String.format("%02d:%02d ", 0, 0);
+		}
 	}
 
 	@Transient
 	public String getRealtimeAsString() {
-		long horas = getRealtime().toHours();
-		Duration minutos = getRealtime().minus(horas, ChronoUnit.HOURS);
-		return String.format("%02d:%02d ", horas, minutos.toMinutes());
+		try {
+			long horas = getRealtime().toHours();
+			Duration minutos = getRealtime().minus(horas, ChronoUnit.HOURS);
+			return String.format("%02d:%02d ", horas, minutos.toMinutes());
+		} catch (Exception e) {
+			// TODO: handle exception
+			return String.format("%02d:%02d ", 0, 0);
+		}
 	}
 
 	@Override

@@ -21,6 +21,7 @@ public class ActivityBO {
 		if (activityVO.getId() == null) {
 			activityVO.setStats(StatusEnum.NOT_STARTED);
 		}
+		activityVO.setRealtime(Duration.ZERO);
 		activityVO.setLastModification(LocalDateTime.now());
 		activityVO = acDAO.saveOrUpdate(activityVO);
 		notifyAllActivityAddedListeners(activityVO);
@@ -36,15 +37,15 @@ public class ActivityBO {
 		notifyAllactivityDeletedListeners(activityVO);
 	}
 
-	public void switchStatus(ActivityVO ac, StatusEnum stats) {
+	public ActivityVO switchStatus(ActivityVO ac, StatusEnum stats) {
 		ac.setStats(stats);
-		acDAO.saveOrUpdate(ac);
+		return acDAO.saveOrUpdate(ac);
 	}
 
-	public void updateRealTime(ActivityVO ac) {
+	public ActivityVO updateRealTime(ActivityVO ac) {
 		Duration realTime = new ExecutionTimeBO().getRealTime(ac);
 		ac.setRealtime(realTime);
-		acDAO.saveOrUpdate(ac);
+		return acDAO.saveOrUpdate(ac);
 
 	}
 

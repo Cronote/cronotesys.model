@@ -2,17 +2,15 @@ package com.cronoteSys.model.bo;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.dao.ExecutionTimeDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ExecutionTimeVO;
 
 public class ExecutionTimeBO {
-	ExecutionTimeDAO execDAO;
+
+	private ExecutionTimeDAO execDAO;
 
 	public ExecutionTimeBO() {
 		execDAO = new ExecutionTimeDAO();
