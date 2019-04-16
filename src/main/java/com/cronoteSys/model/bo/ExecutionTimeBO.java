@@ -20,23 +20,24 @@ public class ExecutionTimeBO {
 		execDAO.delete(executionTimeVO.getId());
 	}
 
-	public void startExecution(ActivityVO ac) {
+	public ExecutionTimeVO startExecution(ActivityVO ac) {
 		if (execDAO.executionInProgressByUser(ac.getUserVO()) == 0) {
 			ExecutionTimeVO exec = new ExecutionTimeVO();
 			exec.setActivityVO(ac);
 			exec.setStartDate(LocalDateTime.now());
-			execDAO.saveOrUpdate(exec);
+			return execDAO.saveOrUpdate(exec);
 		} else {
 			System.out.println("Atividades simultâneas não permitido");
+			return null;
 			// TODO: devolver mecanismos para avisar que o usuario não pode executar
 			// atividades simultâneas
 		}
 	}
 
-	public void finishExecution(ActivityVO ac) {
+	public ExecutionTimeVO finishExecution(ActivityVO ac) {
 		ExecutionTimeVO executionTimeVO = execDAO.executionInProgress(ac);
 		executionTimeVO.setFinishDate(LocalDateTime.now());
-		execDAO.saveOrUpdate(executionTimeVO);
+		return execDAO.saveOrUpdate(executionTimeVO);
 	}
 
 	public Duration getRealTime(ActivityVO act) {
