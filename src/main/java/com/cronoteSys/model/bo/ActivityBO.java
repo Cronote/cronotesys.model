@@ -37,14 +37,39 @@ public class ActivityBO {
 		notifyAllactivityDeletedListeners(activityVO);
 	}
 
+	public ActivityVO breakStatus(ActivityVO ac) {
+		StatusEnum stats = ac.getStats();
+		switch (stats) {
+		case NORMAL_IN_PROGRESS:
+			stats = StatusEnum.BROKEN_IN_PROGRESS;
+			break;
+		case NORMAL_PAUSED:
+			stats = StatusEnum.BROKEN_PAUSED;
+			break;
+		case NORMAL_FINALIZED:
+			stats = StatusEnum.BROKEN_FINALIZED;
+			break;
+		default:
+			break;
+
+		}
+
+		ac.setStats(stats);
+		return acDAO.saveOrUpdate(ac);
+	}
+
 	public ActivityVO switchStatus(ActivityVO ac, StatusEnum stats) {
 		ac.setStats(stats);
+		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
+			return breakStatus(ac);
 		return acDAO.saveOrUpdate(ac);
 	}
 
 	public ActivityVO updateRealTime(ActivityVO ac) {
 		Duration realTime = new ExecutionTimeBO().getRealTime(ac);
 		ac.setRealtime(realTime);
+		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
+			ac = breakStatus(ac);
 		return acDAO.saveOrUpdate(ac);
 
 	}

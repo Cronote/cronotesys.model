@@ -158,9 +158,11 @@ public class ActivityVO implements java.io.Serializable {
 	@Transient
 	public String getEstimatedTimeAsString() {
 		try {
-			long horas = getEstimatedTime().toHours();
-			Duration minutos = getEstimatedTime().minus(horas, ChronoUnit.HOURS);
-			return String.format("%02d:%02d ", horas, minutos.toMinutes());
+			long seconds = getEstimatedTime().getSeconds();
+			long absSeconds = Math.abs(seconds);
+			String positive = String.format("%02d:%02d:%02d", absSeconds / 3600, (absSeconds % 3600) / 60,
+					absSeconds % 60);
+			return positive;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return String.format("%02d:%02d ", 0, 0);
@@ -170,9 +172,11 @@ public class ActivityVO implements java.io.Serializable {
 	@Transient
 	public String getRealtimeAsString() {
 		try {
-			long horas = getRealtime().toHours();
-			Duration minutos = getRealtime().minus(horas, ChronoUnit.HOURS);
-			return String.format("%02d:%02d ", horas, minutos.toMinutes());
+			long seconds = getRealtime().getSeconds();
+			long absSeconds = Math.abs(seconds);
+			String positive = String.format("%02d:%02d:%02d", absSeconds / 3600, (absSeconds % 3600) / 60,
+					absSeconds % 60);
+			return positive;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return String.format("%02d:%02d ", 0, 0);
