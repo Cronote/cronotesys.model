@@ -9,6 +9,7 @@ import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.StatusEnum;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.util.ActivityMonitor;
 
 public class ActivityBO {
 	ActivityDAO acDAO;
@@ -75,7 +76,13 @@ public class ActivityBO {
 	}
 
 	public List<ActivityVO> listAllByUser(UserVO user) {
-		return acDAO.getList(user);
+		List<ActivityVO> lst = acDAO.getList(user);
+		for (ActivityVO activityVO : lst) {
+			if (StatusEnum.inProgress(activityVO.getStats())) {
+				ActivityMonitor.addActivity(activityVO);
+			}
+		}
+		return lst;
 	}
 
 	private static ArrayList<OnActivityAddedI> activityAddedListeners = new ArrayList<OnActivityAddedI>();
