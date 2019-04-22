@@ -18,6 +18,7 @@ import javax.persistence.Persistence;
 public class HibernateUtil {
 
 	public static EntityManagerFactory factory = null;
+	private static EntityManager entityManager = null;
 
 	static {
 		init();
@@ -36,6 +37,9 @@ public class HibernateUtil {
 	}
 
 	public static EntityManager getEntityManager() {
-		return factory.createEntityManager(); // Prove a parte de persistência
+		if (entityManager == null) {
+			entityManager = factory.createEntityManager();
+		}
+		return entityManager; // Prove a parte de persistência
 	}
 }

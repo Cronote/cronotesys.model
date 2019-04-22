@@ -1,5 +1,7 @@
 package com.cronoteSys.model.dao;
 
+import java.util.List;
+
 import javax.persistence.NoResultException;
 
 import com.cronoteSys.model.vo.CategoryVO;
@@ -11,13 +13,17 @@ public class CategoryDAO extends GenericsDAO<CategoryVO, Integer> {
 		super(CategoryVO.class);
 	}
 
-	public CategoryVO findByDescriptionAndUser(String descript,UserVO user) {
+	public CategoryVO findByDescriptionAndUser(String descript, UserVO user) {
 		try {
-			return (CategoryVO) entityManager.createQuery("From c where c._description = :desc and c_userVO= :user")
-					.setParameter(":desc", descript)
-					.setParameter("user", user).getSingleResult();
+			return (CategoryVO) entityManager.createQuery("From c where c.description = :desc and c.userVO= :user")
+					.setParameter("desc", descript).setParameter("user", user).getSingleResult();
 		} catch (NoResultException e) {
 			return null;
 		}
+	}
+
+	public List<CategoryVO> listByDescriptionAndUser(String descript, UserVO user) {
+		return entityManager.createQuery("From CategoryVO c where c.description like :desc and c.userVO= :user")
+				.setParameter("desc","%" +descript+"%").setParameter("user", user).getResultList();
 	}
 }
