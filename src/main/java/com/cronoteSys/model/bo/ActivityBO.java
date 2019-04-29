@@ -4,9 +4,11 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.vo.ActivityVO;
+import com.cronoteSys.model.vo.ProjectVO;
 import com.cronoteSys.model.vo.StatusEnum;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.ActivityMonitor;
@@ -75,8 +77,22 @@ public class ActivityBO {
 
 	}
 
-	public List<ActivityVO> listAllByUser(UserVO user) {
-		List<ActivityVO> lst = acDAO.getList(user);
+	public List<ActivityVO> listAllByUserAndProject(UserVO user, ProjectVO project) {
+		List<ActivityVO> lst = null;
+		if (project != null)
+			lst = acDAO.getList(user, project);
+		else {
+			lst = acDAO.getList(user);
+			Predicate<ActivityVO> p = new Predicate<ActivityVO>() {
+				@Override
+				public boolean test(ActivityVO act) {
+					if (act.getProjectVO() != null)
+						return true;
+					return false;
+				}
+			};
+			lst.removeIf(p);
+		}
 		for (ActivityVO activityVO : lst) {
 			if (StatusEnum.inProgress(activityVO.getStats())) {
 				ActivityMonitor.addActivity(activityVO);
@@ -95,6 +111,10 @@ public class ActivityBO {
 		activityAddedListeners.add(newListener);
 	}
 
+	public static void removeOnActivityAddedIListener(OnActivityAddedI newListener) {
+		activityAddedListeners.remove(newListener);
+	}
+
 	private void notifyAllActivityAddedListeners(ActivityVO act) {
 		for (OnActivityAddedI l : activityAddedListeners) {
 			l.onActivityAddedI(act);
@@ -109,6 +129,10 @@ public class ActivityBO {
 
 	public static void addOnActivityDeletedListener(OnActivityDeletedI newListener) {
 		activityDeletedListeners.add(newListener);
+	}
+
+	public static void removeOnActivityDeletedListener(OnActivityDeletedI newListener) {
+		activityDeletedListeners.remove(newListener);
 	}
 
 	private void notifyAllactivityDeletedListeners(ActivityVO act) {
