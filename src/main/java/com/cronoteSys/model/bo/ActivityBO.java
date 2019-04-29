@@ -84,7 +84,6 @@ public class ActivityBO {
 		else {
 			lst = acDAO.getList(user);
 			Predicate<ActivityVO> p = new Predicate<ActivityVO>() {
-				@Override
 				public boolean test(ActivityVO act) {
 					if (act.getProjectVO() != null)
 						return true;
