@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -24,6 +25,7 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table(name = "tb_user")
+@XmlRootElement
 public class UserVO implements java.io.Serializable {
 
 	/**
