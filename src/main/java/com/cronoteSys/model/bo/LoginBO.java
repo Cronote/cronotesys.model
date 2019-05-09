@@ -10,6 +10,7 @@ import java.util.List;
 import com.cronoteSys.model.dao.LoginDAO;
 import com.cronoteSys.model.vo.LoginVO;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.util.RestUtil;
 
 /**
  *
@@ -18,7 +19,11 @@ import com.cronoteSys.model.vo.UserVO;
 public class LoginBO {
 
 	public LoginVO save(LoginVO login) {
-		return new LoginDAO().saveOrUpdate(login);
+		if(RestUtil.isConnectedToTheServer()) {
+			return new LoginDAO().saveOrUpdate(login);
+		}else {
+			return new LoginDAO().saveOrUpdate(login);
+		}
 	}
 
 	public void update(LoginVO login) {
@@ -34,7 +39,12 @@ public class LoginBO {
 	}
 
 	public UserVO login(LoginVO login) {
-		UserVO user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
+		UserVO user = null;
+		if(RestUtil.isConnectedToTheServer()) {
+			user = (UserVO) RestUtil.post("http://localhost:8081/Test/webapi/myresource/login", UserVO.class, login);
+		}else {
+			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
+		}
 		return (user != null && user.getStats() == 1) ? user : null;
 	}
 
