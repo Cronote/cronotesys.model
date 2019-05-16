@@ -12,9 +12,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "tb_activity")
+@XmlRootElement
 public class ActivityVO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;

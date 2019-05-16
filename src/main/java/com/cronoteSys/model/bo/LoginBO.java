@@ -20,7 +20,7 @@ public class LoginBO {
 
 	public LoginVO save(LoginVO login) {
 		if(RestUtil.isConnectedToTheServer()) {
-			return new LoginDAO().saveOrUpdate(login);
+			return (LoginVO) RestUtil.post("saveLogin", LoginVO.class, login);
 		}else {
 			return new LoginDAO().saveOrUpdate(login);
 		}
@@ -41,7 +41,7 @@ public class LoginBO {
 	public UserVO login(LoginVO login) {
 		UserVO user = null;
 		if(RestUtil.isConnectedToTheServer()) {
-			user = (UserVO) RestUtil.post("http://localhost:8081/Test/webapi/myresource/login", UserVO.class, login);
+			user = (UserVO) RestUtil.post("login", UserVO.class, login);
 		}else {
 			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
 		}
@@ -49,6 +49,9 @@ public class LoginBO {
 	}
 
 	public LoginVO loginExists(String sEmail) {
+		if(RestUtil.isConnectedToTheServer()) {
+			return RestUtil.get("").readEntity(LoginVO.class);
+		}
 		return new LoginDAO().loginExists(sEmail);
 	}
 

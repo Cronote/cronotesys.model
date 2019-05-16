@@ -8,9 +8,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "tb_category")
+@XmlRootElement
 public class CategoryVO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;

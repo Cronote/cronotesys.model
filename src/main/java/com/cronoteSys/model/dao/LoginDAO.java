@@ -44,7 +44,7 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 			}
 
 		} catch (Exception e) {
-			System.out.println("Erro de verificaÃ§Ã£o de usuario: " + e.getMessage());
+			System.out.println("Erro de verificação de usuario: " + e.getMessage());
 		}
 		return null;
 	}

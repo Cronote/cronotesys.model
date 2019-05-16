@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.cronoteSys.model.dao.UserDAO;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.util.RestUtil;
 
 /**
  *
@@ -24,13 +25,16 @@ public class UserBO {
 
 	public UserVO save(UserVO user) {
 		if (user.getRegisterDate() == null) user.setRegisterDate(new Date());
+		if(RestUtil.isConnectedToTheServer()) {
+			user = (UserVO) RestUtil.post("saveUser", UserVO.class, user);
+		}
 		user = userDao.saveOrUpdate(user);
 		return user;
 	}
 
-	public void update(UserVO user) {
-		userDao.saveOrUpdate(user);
-	}
+//	public void update(UserVO user) {
+//		userDao.saveOrUpdate(user);
+//	}
 
 //    public boolean activateOrInactivate(UserVO user) {
 //        if (user.getStats() == 1) { //ativado
@@ -48,6 +52,5 @@ public class UserBO {
 
 	public List<UserVO> listAll() {
 		return userDao.listAll();
-
 	}
 }

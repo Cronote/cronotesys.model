@@ -6,12 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
 import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ProjectVO;
 import com.cronoteSys.model.vo.StatusEnum;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.ActivityMonitor;
+import com.cronoteSys.util.RestUtil;
 
 public class ActivityBO {
 	ActivityDAO acDAO;
@@ -26,7 +32,11 @@ public class ActivityBO {
 		}
 		activityVO.setRealtime(Duration.ZERO);
 		activityVO.setLastModification(LocalDateTime.now());
-		activityVO = acDAO.saveOrUpdate(activityVO);
+		if (RestUtil.isConnectedToTheServer()) {
+			activityVO = (ActivityVO) RestUtil.post("saveActivity", ActivityVO.class, activityVO);
+		} else {
+			activityVO = acDAO.saveOrUpdate(activityVO);
+		}
 		notifyAllActivityAddedListeners(activityVO);
 		return activityVO;
 	}
@@ -36,7 +46,12 @@ public class ActivityBO {
 	}
 
 	public void delete(ActivityVO activityVO) {
-		acDAO.delete(activityVO.getId());
+		if (RestUtil.isConnectedToTheServer()) {
+			RestUtil.delete("deleteActivity", activityVO.getId());
+			notifyAllactivityDeletedListeners(activityVO);
+		} else {
+			acDAO.delete(activityVO.getId());
+		}
 		notifyAllactivityDeletedListeners(activityVO);
 	}
 
@@ -56,8 +71,9 @@ public class ActivityBO {
 			break;
 
 		}
-
 		ac.setStats(stats);
+		if (RestUtil.isConnectedToTheServer())
+			return (ActivityVO) RestUtil.post("saveActivity", ActivityVO.class, ac);
 		return acDAO.saveOrUpdate(ac);
 	}
 
@@ -65,6 +81,8 @@ public class ActivityBO {
 		ac.setStats(stats);
 		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
 			return breakStatus(ac);
+		if (RestUtil.isConnectedToTheServer())
+			return (ActivityVO) RestUtil.post("saveActivity", ActivityVO.class, ac);
 		return acDAO.saveOrUpdate(ac);
 	}
 
@@ -73,24 +91,38 @@ public class ActivityBO {
 		ac.setRealtime(realTime);
 		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
 			ac = breakStatus(ac);
+		if (RestUtil.isConnectedToTheServer())
+			return (ActivityVO) RestUtil.post("saveActivity", ActivityVO.class, ac);
 		return acDAO.saveOrUpdate(ac);
 
 	}
 
 	public List<ActivityVO> listAllByUserAndProject(UserVO user, ProjectVO project) {
 		List<ActivityVO> lst = null;
-		if (project != null)
-			lst = acDAO.getList(user, project);
-		else {
-			lst = acDAO.getList(user);
-			Predicate<ActivityVO> p = new Predicate<ActivityVO>() {
-				public boolean test(ActivityVO act) {
-					if (act.getProjectVO() != null)
-						return true;
-					return false;
-				}
-			};
-			lst.removeIf(p);
+		if (project != null) {
+			if (RestUtil.isConnectedToTheServer()) {
+				Client client = ClientBuilder.newClient();
+				WebTarget target = client.target(RestUtil.host+"getListByActivity1?user="+user+"&project="+project);
+				lst = (List<ActivityVO>) target.request().get();
+			} else {
+				lst = acDAO.getList(user, project);
+			}
+		} else {
+			if (RestUtil.isConnectedToTheServer()) {
+				Client client = ClientBuilder.newClient();
+				WebTarget target = client.target(RestUtil.host+"getListByActivity2?user="+user);
+				lst = (List<ActivityVO>) target.request().get();
+			} else {
+				lst = acDAO.getList(user);
+				Predicate<ActivityVO> p = new Predicate<ActivityVO>() {
+					public boolean test(ActivityVO act) {
+						if (act.getProjectVO() != null)
+							return true;
+						return false;
+					}
+				};
+				lst.removeIf(p);
+			}
 		}
 		for (ActivityVO activityVO : lst) {
 			if (StatusEnum.inProgress(activityVO.getStats())) {

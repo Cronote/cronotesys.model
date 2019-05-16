@@ -2,11 +2,17 @@ package com.cronoteSys.model.bo;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 
 import com.cronoteSys.model.dao.ExecutionTimeDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ExecutionTimeVO;
+import com.cronoteSys.util.RestUtil;
 
 public class ExecutionTimeBO {
 
@@ -25,9 +31,12 @@ public class ExecutionTimeBO {
 			ExecutionTimeVO exec = new ExecutionTimeVO();
 			exec.setActivityVO(ac);
 			exec.setStartDate(LocalDateTime.now());
+			if(RestUtil.isConnectedToTheServer()) {
+				return (ExecutionTimeVO) RestUtil.post("saveExecutionTime", ExecutionTimeVO.class, exec);
+			}
 			return execDAO.saveOrUpdate(exec);
 		} else {
-			System.out.println("Atividades simultâneas não permitido");
+			System.out.println("Atividades simult�neas n�o permitido");
 			return null;
 			// TODO: devolver mecanismos para avisar que o usuario não pode executar
 			// atividades simultâneas
@@ -35,13 +44,28 @@ public class ExecutionTimeBO {
 	}
 
 	public ExecutionTimeVO finishExecution(ActivityVO ac) {
-		ExecutionTimeVO executionTimeVO = execDAO.executionInProgress(ac);
+		ExecutionTimeVO executionTimeVO = new ExecutionTimeVO();
+		if(RestUtil.isConnectedToTheServer()) {
+			executionTimeVO = RestUtil.get("executionInProgress").readEntity(ExecutionTimeVO.class);
+		}else {
+			executionTimeVO = execDAO.executionInProgress(ac);
+		}
 		executionTimeVO.setFinishDate(LocalDateTime.now());
+		if(RestUtil.isConnectedToTheServer()) {
+			return (ExecutionTimeVO) RestUtil.post("saveExecutionTime", ExecutionTimeVO.class, executionTimeVO);
+		}
 		return execDAO.saveOrUpdate(executionTimeVO);
 	}
 
 	public Duration getRealTime(ActivityVO act) {
-		List<ExecutionTimeVO> lst = execDAO.listByActivity(act);
+		List<ExecutionTimeVO> lst = new ArrayList<ExecutionTimeVO>();
+		if(RestUtil.isConnectedToTheServer()){
+			Client client = ClientBuilder.newClient();
+			WebTarget target = client.target(RestUtil.host+"listExecutionTimeByActivity?activity="+act);
+			lst =  (List<ExecutionTimeVO>) target.request().get();
+		}else {
+			lst = execDAO.listByActivity(act);
+		}
 		Duration sum = Duration.ZERO;
 		if (lst.size() == 0)
 			return sum;
