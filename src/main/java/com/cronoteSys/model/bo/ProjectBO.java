@@ -7,10 +7,8 @@ import java.util.List;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 
 import com.cronoteSys.model.dao.ProjectDAO;
-import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ProjectVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.RestUtil;
@@ -26,15 +24,20 @@ public class ProjectBO {
 	public ProjectVO save(ProjectVO objProject) {
 		objProject.setStats(0);
 		objProject.setLastModification(LocalDateTime.now());
-		if(RestUtil.isConnectedToTheServer()) {
-			return (ProjectVO) RestUtil.post("saveProject", ProjectVO.class, objProject);
+		if (RestUtil.isConnectedToTheServer()) {
+			objProject = (ProjectVO) RestUtil.post("saveProject", ProjectVO.class, objProject);
+		} else {
+			objProject = projectDAO.saveOrUpdate(objProject);
+
 		}
-		return projectDAO.saveOrUpdate(objProject);
+		notifyAllProjectAddedListeners(objProject);
+		return objProject;
+
 	}
 
 	public ProjectVO update(ProjectVO objProject) {
 		objProject.setLastModification(LocalDateTime.now());
-		if(RestUtil.isConnectedToTheServer()) {
+		if (RestUtil.isConnectedToTheServer()) {
 			return (ProjectVO) RestUtil.post("saveProject", ProjectVO.class, objProject);
 		}
 		return projectDAO.saveOrUpdate(objProject);
@@ -44,20 +47,21 @@ public class ProjectBO {
 		int projectID = objProject.getId();
 		if (projectID == 0)
 			return;
-		if(RestUtil.isConnectedToTheServer()) {
+		if (RestUtil.isConnectedToTheServer()) {
 			RestUtil.delete("deleteProject", projectID);
-		}else {
+		} else {
 			projectDAO.delete(projectID);
 		}
+		notifyAllProjectDeletedListeners(objProject);
 	}
 
 	public List<ProjectVO> listAll(UserVO user) {
 		List<ProjectVO> projects = new ArrayList<ProjectVO>();
-		if(RestUtil.isConnectedToTheServer()) {
+		if (RestUtil.isConnectedToTheServer()) {
 			Client client = ClientBuilder.newClient();
-			WebTarget target = client.target(RestUtil.host+"getListProjectByUser?user="+user);
+			WebTarget target = client.target(RestUtil.host + "getListProjectByUser?user=" + user);
 			projects = (List<ProjectVO>) target.request().get();
-		}else {
+		} else {
 			projects = projectDAO.getList(user);
 		}
 		if (!projects.isEmpty() && projects.get(0).getId() == 0)
@@ -73,5 +77,45 @@ public class ProjectBO {
 	public void changeStatus(ProjectVO objProject, int status) {
 		objProject.setStats(status);
 		update(objProject);
+	}
+
+	private static ArrayList<OnProjectAddedI> projectAddedListeners = new ArrayList<OnProjectAddedI>();
+
+	public interface OnProjectAddedI {
+		void onProjectAddedI(ProjectVO proj);
+	}
+
+	public static void addOnProjectAddedIListener(OnProjectAddedI newListener) {
+		projectAddedListeners.add(newListener);
+	}
+
+	public static void removeOnProjectAddedIListener(OnProjectAddedI newListener) {
+		projectAddedListeners.remove(newListener);
+	}
+
+	private void notifyAllProjectAddedListeners(ProjectVO act) {
+		for (OnProjectAddedI l : projectAddedListeners) {
+			l.onProjectAddedI(act);
+		}
+	}
+
+	private static ArrayList<OnProjectDeletedI> projectDeletedListeners = new ArrayList<OnProjectDeletedI>();
+
+	public interface OnProjectDeletedI {
+		void onProjectDeleted(ProjectVO proj);
+	}
+
+	public static void addOnProjectDeletedListener(OnProjectDeletedI newListener) {
+		projectDeletedListeners.add(newListener);
+	}
+
+	public static void removeOnProjectDeletedListener(OnProjectDeletedI newListener) {
+		projectDeletedListeners.remove(newListener);
+	}
+
+	private void notifyAllProjectDeletedListeners(ProjectVO proj) {
+		for (OnProjectDeletedI l : projectDeletedListeners) {
+			l.onProjectDeleted(proj);
+		}
 	}
 }

@@ -77,4 +77,8 @@ public class LoginBO {
 			return false;
 		return true;
 	}
+	
+	public LoginVO getLogin(UserVO user) {
+		return new LoginDAO().loginByUser(user);
+	}
 }

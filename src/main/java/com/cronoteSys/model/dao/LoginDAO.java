@@ -63,4 +63,20 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 		}
 		return null;
 	}
+	
+	public LoginVO loginByUser(UserVO u) {
+		try {
+			List<LoginVO> login = entityManager
+					.createQuery("from LoginVO where tbUser=:user")
+					.setParameter("user", u)
+					.getResultList();
+			if (login.size() > 0) {
+				return login.get(0);
+			}
+
+		} catch (Exception e) {
+			System.out.println("Erro na verificação de Usuario: " + e.getMessage());
+		}
+		return null;
+	}
 }

@@ -120,6 +120,13 @@ public class ProjectVO implements java.io.Serializable {
 	}
 
 	@Override
+	public String toString() {
+		return "ProjectVO [id=" + id + ", title=" + title + ", description=" + description + ", lastModification="
+				+ lastModification + ", startDate=" + startDate + ", finishDate=" + finishDate + ", stats=" + stats
+				+ ", userVO=" + userVO + "]";
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

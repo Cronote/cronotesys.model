@@ -2,9 +2,9 @@ package com.cronoteSys.model.vo;
 // Generated 25/06/2018 22:33:40 by Hibernate Tools 4.3.1
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,7 +40,7 @@ public class UserVO implements java.io.Serializable {
 	private String emailRecover;
 	private byte stats;
 	private String avatarPath;
-	private Set<UserVO> tbLogins = new HashSet<UserVO>();
+	private List<LoginVO> tbLogins = new ArrayList<LoginVO>();
 
 	public UserVO() {
 	}
@@ -63,7 +63,7 @@ public class UserVO implements java.io.Serializable {
 	}
 
 	public UserVO(String completeName, LocalDate birthDate, Date registerDate, String emailRecover, byte stats,
-			String avatarPath, Set<UserVO> tbLogins) {
+			String avatarPath, List<LoginVO> tbLogins) {
 		this.completeName = completeName;
 		this.birthDate = birthDate;
 		this.registerDate = registerDate;
@@ -140,12 +140,11 @@ public class UserVO implements java.io.Serializable {
 	}
 
 	@OneToMany
-	@Fetch(FetchMode.SELECT)
-	public Set<UserVO> getTbLogins() {
+	public List<LoginVO> getTbLogins() {
 		return this.tbLogins;
 	}
 
-	public void setTbLogins(Set<UserVO> tbLogins) {
+	public void setTbLogins(List<LoginVO> tbLogins) {
 		this.tbLogins = tbLogins;
 	}
 
