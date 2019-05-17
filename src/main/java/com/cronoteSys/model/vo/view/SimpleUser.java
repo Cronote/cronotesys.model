@@ -1,15 +1,10 @@
 package com.cronoteSys.model.vo.view;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
 import org.hibernate.annotations.Immutable;
 
-@Entity
 @Immutable
 public class SimpleUser implements java.io.Serializable {
 	private static final long serialVersionUID = 7246780223621961050L;
-	@Id
 	private Integer idUser;
 	private String completeName;
 	private String email;

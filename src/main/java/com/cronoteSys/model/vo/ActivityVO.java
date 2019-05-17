@@ -2,6 +2,7 @@ package com.cronoteSys.model.vo;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -10,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -23,7 +26,7 @@ public class ActivityVO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Integer id;
+	public Integer id;
 	private String title;
 	private String description;
 	private Duration estimatedTime;
@@ -53,6 +56,13 @@ public class ActivityVO implements java.io.Serializable {
 		this.userVO = userVO;
 		this.projectVO = projectVO;
 		this.categoryVO = categoryVO;
+	}
+
+	public ActivityVO(SimpleActivity sa) {
+		this.id = sa.getId();
+		this.title = sa.getTitle();
+		this.priority = sa.getPriority();
+		this.categoryVO = sa.getCategoryVO();
 	}
 
 	@Id
@@ -158,17 +168,24 @@ public class ActivityVO implements java.io.Serializable {
 	public void setCategoryVO(CategoryVO categoryVO) {
 		this.categoryVO = categoryVO;
 	}
-	
-	@OneToMany()
+
+	@ManyToMany
+	@JoinTable(name = "dependencies", joinColumns = { @JoinColumn(name = "id_activity") }, inverseJoinColumns = {
+			@JoinColumn(name = "id_dependency") })
 	public List<ActivityVO> getDependencies() {
-		return dependencies;
+		return dependencies != null ? dependencies : new ArrayList<ActivityVO>();
 	}
-	
+
 	public void setDependencies(List<ActivityVO> dependencies) {
 		this.dependencies = dependencies;
 	}
-	
-
+	public void setDependenciesFromSimple(List<SimpleActivity> dependencies) {
+		List<ActivityVO> lst = new ArrayList<ActivityVO>();
+		for (SimpleActivity simple : dependencies) {
+			lst.add(new ActivityVO(simple));
+		}
+		this.dependencies = lst;
+	}
 	@Transient
 	public String getEstimatedTimeAsString() {
 		try {
@@ -195,14 +212,6 @@ public class ActivityVO implements java.io.Serializable {
 			// TODO: handle exception
 			return String.format("%02d:%02d ", 0, 0);
 		}
-	}
-
-	@Override
-	public String toString() {
-		return "ActivityVO [_id_Activity=" + id + ", _title=" + title + ", _description=" + description
-				+ ", _estimated_Time=" + estimatedTime + ", _stats=" + stats + ", _realtime=" + realtime
-				+ ", _priority=" + priority + ", _last_Modification=" + lastModification + ", _userVO=" + userVO
-				+ ", _projectVO=" + projectVO + ", _categoryVO=" + categoryVO + "]";
 	}
 
 	@Override
