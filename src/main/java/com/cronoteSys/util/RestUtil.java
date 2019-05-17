@@ -11,8 +11,8 @@ public class RestUtil {
 	public static String host = "http://localhost:8081/Test/webapi/myresource/";
 	
 	public static boolean isConnectedToTheServer() {
-		Response response = get(host+"connection").readEntity(Response.class);
-		if(response.getStatus() == 200) {
+		String response = get(host+"connection").readEntity(String.class);
+		if(response.contains("SUCCESS")) {
 			return true;
 		}
 		return false;
