@@ -42,6 +42,7 @@ public class LoginBO {
 		UserVO user = null;
 		if(RestUtil.isConnectedToTheServer()) {
 			user = (UserVO) RestUtil.post("login", UserVO.class, login);
+			System.out.println("aro");
 		}else {
 			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
 		}
