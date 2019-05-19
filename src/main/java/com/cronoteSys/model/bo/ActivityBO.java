@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -13,11 +12,11 @@ import javax.ws.rs.client.WebTarget;
 import com.cronoteSys.filter.ActivityFilter;
 import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.vo.ActivityVO;
-import com.cronoteSys.model.vo.ProjectVO;
 import com.cronoteSys.model.vo.StatusEnum;
-import com.cronoteSys.model.vo.UserVO;
-import com.cronoteSys.util.ActivityMonitor;
 import com.cronoteSys.util.RestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class ActivityBO {
 	ActivityDAO acDAO;
@@ -99,8 +98,16 @@ public class ActivityBO {
 	public List<ActivityVO> listAll(ActivityFilter filter) {
 		if (RestUtil.isConnectedToTheServer()) {
 			Client client = ClientBuilder.newClient();
-			WebTarget target = client.target(RestUtil.host+"getActivityList?filter="+filter);
-			return (List<ActivityVO>) target.request().get();
+            WebTarget target = client.target(RestUtil.host+"getActivityList?filter="+filter);
+            List<ActivityVO> activityVOs = new ArrayList<ActivityVO>();
+            String string = target.request().get().readEntity(String.class);
+            System.out.println(string);
+            JsonArray jsonObject = new JsonParser().parse(string).getAsJsonArray();
+            for (int i = 0; i < jsonObject.size(); i++) {
+                JsonElement element = jsonObject.get(i);
+                System.out.println(element.getAsJsonObject().get("id").getAsInt());
+            }
+			return target.request().get(new ArrayList<ActivityVO>().getClass());
 		}
 		return acDAO.getFiltredList(filter);
 	}

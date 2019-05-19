@@ -12,18 +12,21 @@ public class RestUtil {
 
 	public static boolean isConnectedToTheServer() {
 		try {
-			String response = get(host + "connection").readEntity(String.class);
-			if (response.contains("SUCCESS")) {
-				System.out.println("Online");
+			String response = get("connection").readEntity(String.class);
+			System.out.println(response);
+//			if (response.contains("SUCCESS")) {
+//				System.out.println("Online");
 				return true;
 
-			}
+//			}
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
 
 	public static Response get(String link) {
+		System.out.println(link);
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(host + link);
 		Response response = target.request(MediaType.APPLICATION_JSON).get();

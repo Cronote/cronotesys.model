@@ -22,7 +22,8 @@ public class LoginBO {
 		if(RestUtil.isConnectedToTheServer()) {
 			return (LoginVO) RestUtil.post("saveLogin", LoginVO.class, login);
 		}else {
-			return new LoginDAO().saveOrUpdate(login);
+			return null;
+//			return new LoginDAO().saveOrUpdate(login);
 		}
 	}
 

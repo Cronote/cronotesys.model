@@ -149,13 +149,6 @@ public class UserVO implements java.io.Serializable {
 	}
 
 	@Override
-	public String toString() {
-		return "UserVO [idUser=" + idUser + ", completeName=" + completeName + ", birthDate=" + birthDate
-				+ ", registerDate=" + registerDate + ", emailRecover=" + emailRecover + ", stats=" + stats
-				+ ", avatarPath=" + avatarPath + ", tbLogins=" + tbLogins + "]";
-	}
-
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

@@ -9,9 +9,13 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import com.cronoteSys.model.dao.ProjectDAO;
+import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ProjectVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.RestUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class ProjectBO {
 
@@ -60,7 +64,15 @@ public class ProjectBO {
 		if (RestUtil.isConnectedToTheServer()) {
 			Client client = ClientBuilder.newClient();
 			WebTarget target = client.target(RestUtil.host + "getListProjectByUser?user=" + user);
-			projects = (List<ProjectVO>) target.request().get();
+			List<ProjectVO> activityVOs = new ArrayList<ProjectVO>();
+			String string = target.request().get().readEntity(String.class);
+			System.out.println(string);
+			JsonArray jsonObject = new JsonParser().parse(string).getAsJsonArray();
+			for (int i = 0; i < jsonObject.size(); i++) {
+				JsonElement element = jsonObject.get(i);
+				System.out.println(element.getAsJsonObject().get("id").getAsInt());
+			}
+			return target.request().get(new ArrayList<ProjectVO>().getClass());
 		} else {
 			projects = projectDAO.getList(user);
 		}
