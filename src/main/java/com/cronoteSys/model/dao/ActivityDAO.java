@@ -35,30 +35,48 @@ public class ActivityDAO extends GenericsDAO<ActivityVO, Integer> {
 		return q.getResultList();
 	}
 
-
 	public List<SimpleActivity> getSimpleActivitiesView(ActivityFilter filter) {
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
-		CriteriaQuery<SimpleActivity> criteria = builder.createQuery(SimpleActivity.class);
-		Root<ActivityVO> root = criteria.from(ActivityVO.class);
+        CriteriaQuery<SimpleActivity> criteria = builder.createQuery(SimpleActivity.class);
+        Root<ActivityVO> root = criteria.from(ActivityVO.class);
 
-		Path<Integer> idPath = root.get("id");
-		Path<String> title = root.get("title");
-		Path<Integer> priority = root.get("priority");
-		Path<CategoryVO> category = root.get("categoryVO");
+        Path<Integer> idPath = root.get("id");
+        Path<String> title = root.get("title");
+        Path<Integer> priority = root.get("priority");
+        Path<CategoryVO> category = root.get("categoryVO");
 
-		criteria.select(builder.construct(SimpleActivity.class, idPath, title, priority, category));
-		if (filter != null) {
-			List<Predicate> p =  new ArrayList<Predicate>();
-			if (filter.getUser() != null) {
-				p.add(builder.equal(root.get("userVO"), filter.getUser()));
-			}
-			if (filter.getProject() != null) {
-				p.add(builder.equal(root.get("projectVO"), filter.getProject()));
-			}
-			criteria.where(builder.and(p.toArray(new Predicate[p.size()])));
-		}
-		List<SimpleActivity> wrappers = entityManager.createQuery(criteria).getResultList();
-		return wrappers;
-	}
+        criteria.select(builder.construct(SimpleActivity.class, idPath, title, priority, category));
+        criteria.where(makePredicates(filter, builder, root));
+        List<SimpleActivity> wrappers = entityManager.createQuery(criteria).getResultList();
+        return wrappers;
+    }
+
+    public List<ActivityVO> getFiltredList(ActivityFilter filter) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<ActivityVO> criteria = builder.createQuery(ActivityVO.class);
+        Root<ActivityVO> root = criteria.from(ActivityVO.class);
+
+        criteria.select(root);
+        criteria.where(makePredicates(filter, builder, root));
+        List<ActivityVO> wrappers = entityManager.createQuery(criteria).getResultList();
+        return wrappers;
+    }
+
+    private Predicate makePredicates(ActivityFilter filter, CriteriaBuilder builder, Root<ActivityVO> root) {
+        if (filter != null) {
+            List<Predicate> p = new ArrayList<Predicate>();
+            if (filter.getUser() != null) {
+                p.add(builder.equal(root.get("userVO"), filter.getUser()));
+            }
+            if (filter.getProject() != null) {
+                p.add(builder.equal(root.get("projectVO"), filter.getProject()));
+            }else {
+                p.add(builder.isNull(root.get("projectVO")));
+            }
+            return builder.and(p.toArray(new Predicate[p.size()]));
+        }
+        return null;
+    }
 }
