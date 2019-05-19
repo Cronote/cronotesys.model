@@ -10,6 +10,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
+import com.cronoteSys.filter.ActivityFilter;
 import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ProjectVO;
@@ -95,41 +96,15 @@ public class ActivityBO {
 		return acDAO.saveOrUpdate(ac);
 
 	}
-
-	public List<ActivityVO> listAllByUserAndProject(UserVO user, ProjectVO project) {
-		List<ActivityVO> lst = null;
-		if (project != null) {
-			if (RestUtil.isConnectedToTheServer()) {
-				Client client = ClientBuilder.newClient();
-				WebTarget target = client.target(RestUtil.host+"getListByActivity1?user="+user+"&project="+project);
-				lst = (List<ActivityVO>) target.request().get();
-			} else {
-				lst = acDAO.getList(user, project);
-			}
-		} else {
-			if (RestUtil.isConnectedToTheServer()) {
-				Client client = ClientBuilder.newClient();
-				WebTarget target = client.target(RestUtil.host+"getListByActivity2?user="+user);
-				lst = (List<ActivityVO>) target.request().get();
-			} else {
-				lst = acDAO.getList(user);
-				Predicate<ActivityVO> p = new Predicate<ActivityVO>() {
-					public boolean test(ActivityVO act) {
-						if (act.getProjectVO() != null)
-							return true;
-						return false;
-					}
-				};
-				lst.removeIf(p);
-			}
+	public List<ActivityVO> listAll(ActivityFilter filter) {
+		if (RestUtil.isConnectedToTheServer()) {
+			Client client = ClientBuilder.newClient();
+			WebTarget target = client.target(RestUtil.host+"getActivityList?filter="+filter);
+			return (List<ActivityVO>) target.request().get();
 		}
-		for (ActivityVO activityVO : lst) {
-			if (StatusEnum.inProgress(activityVO.getStats())) {
-				ActivityMonitor.addActivity(activityVO);
-			}
-		}
-		return lst;
+		return acDAO.getFiltredList(filter);
 	}
+
 
 	private static ArrayList<OnActivityAddedI> activityAddedListeners = new ArrayList<OnActivityAddedI>();
 

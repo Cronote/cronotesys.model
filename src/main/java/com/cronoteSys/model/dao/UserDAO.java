@@ -65,7 +65,7 @@ public class UserDAO extends GenericsDAO<UserVO, Integer> {
 		String query = "select new com.cronoteSys.model.vo.view.SimpleUser"
 				+ "(u.idUser, u.completeName, l.email) " + " from LoginVO l"
 				+ " left join UserVO u on u.idUser=l.tbUser " + where;
-//		System.out.println(query);
+		System.out.println(query);
 		List<SimpleUser> users;
 		users = entityManager.createQuery(query, SimpleUser.class).getResultList();
 
