@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-configuration PUBLIC
-        "-//Hibernate/Hibernate Configuration DTD 4.0//EN"
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
         "http://hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
-        <!-- Database connection properties - Driver, URL, user, password -->
-        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
-        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+    <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.url">jdbc:postgresql://localhost/MYAPP</property>
-        <property name="hibernate.connection.username">user</property>
-        <property name="hibernate.connection.password">password</property>
-        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.connection.username">postgres</property>
+        <property name="hibernate.connection.password">1390</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
 
-        <!-- org.hibernate.HibernateException: No CurrentSessionContext configured! -->
-        <property name="hibernate.current_session_context_class">thread</property>
-
-        <!-- Mapping with model class containing annotations -->
         <mapping class="com.cronoteSys.model.vo.LoginVO" />
         <mapping class="com.cronoteSys.model.vo.UserVO" />
+        <mapping class="com.cronoteSys.model.vo.ProjectVO" />
+        <mapping class="com.cronoteSys.model.vo.ActivityVO" />
+        <mapping class="com.cronoteSys.model.vo.CategoryVO" />
+        <mapping class="com.cronoteSys.model.vo.ExecutionTimeVO" />
     </session-factory>
 </hibernate-configuration>

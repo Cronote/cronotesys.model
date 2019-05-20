@@ -27,46 +27,46 @@ public class HibernateUtil {
 	public static EntityManagerFactory factory = null;
 	private static EntityManager entityManager = null;
 
+	private static final SessionFactory sessionFactory;
+
 	static {
-		getEntityManager();
-	}
-
-	private static void init() {
 		try {
-			if (factory == null) {
-//				factory = buildSessionFactory().createEntityManager();
-
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-
+			// Create the SessionFactory from standard (hibernate.cfg.xml)
+			// config file.
+			sessionFactory = buildSessionFactory();
+		} catch (Throwable ex) {
+			// Log the exception.
+			System.err.println("Initial SessionFactory creation failed." + ex);
+			throw new ExceptionInInitializerError(ex);
 		}
 	}
-
 	public static EntityManager getEntityManager() {
 		if (entityManager == null) {
-			entityManager = buildSessionFactory().createEntityManager();;
+			entityManager = sessionFactory.createEntityManager();
 		}
 		return entityManager; // Prove a parte de persistência
 	}
 
 	private static SessionFactory buildSessionFactory() {
 		try {
+			String s = System.getenv("DATABASE_URL");
+			System.out.println(s);
 			// Create the SessionFactory from hibernate.cfg.xml
 			Configuration configuration = new Configuration();
 			configuration.configure("hibernate.cfg.xml");
 
-			configuration.setProperty("hibernate.connection.url", System.getenv("DATABASE_URL"));
-
-			URI dbUri = new URI(System.getenv("DATABASE_URL"));
+			URI dbUri = new URI(s);
 
 			String username = dbUri.getUserInfo().split(":")[0];
 			String password = dbUri.getUserInfo().split(":")[1];
-			String dbUrl = "jdbc:postgresql://" 
-			+ dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+			String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+			System.out.println(dbUrl);
 			configuration.setProperty("hibernate.connection.username", username);
 			configuration.setProperty("hibernate.connection.password", password);
 			configuration.setProperty("hibernate.connection.url", dbUrl);
+//			configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5432/MYAPP");
+//			configuration.setProperty("hbm2ddl.auto", "update");
+			configuration.setProperty("hibernate.hbm2ddl.auto", "update");
 			System.out.println("Hibernate Annotation Configuration loaded");
 
 			ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
