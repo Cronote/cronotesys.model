@@ -24,7 +24,6 @@ import org.hibernate.service.ServiceRegistry;
  */
 public class HibernateUtil {
 
-	public static EntityManagerFactory factory = null;
 	private static EntityManager entityManager = null;
 
 	private static final SessionFactory sessionFactory;
@@ -33,53 +32,54 @@ public class HibernateUtil {
 		try {
 			// Create the SessionFactory from standard (hibernate.cfg.xml)
 			// config file.
-			sessionFactory = buildSessionFactory();
+			sessionFactory = new Configuration().configure().buildSessionFactory();
 		} catch (Throwable ex) {
 			// Log the exception.
 			System.err.println("Initial SessionFactory creation failed." + ex);
 			throw new ExceptionInInitializerError(ex);
 		}
 	}
+
 	public static EntityManager getEntityManager() {
 		if (entityManager == null) {
 			entityManager = sessionFactory.createEntityManager();
 		}
 		return entityManager; // Prove a parte de persistência
 	}
-
-	private static SessionFactory buildSessionFactory() {
-		try {
-			String s = System.getenv("DATABASE_URL");
-			System.out.println(s);
-			// Create the SessionFactory from hibernate.cfg.xml
-			Configuration configuration = new Configuration();
-			configuration.configure("hibernate.cfg.xml");
-
-			URI dbUri = new URI(s);
-
-			String username = dbUri.getUserInfo().split(":")[0];
-			String password = dbUri.getUserInfo().split(":")[1];
-			String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
-			System.out.println(dbUrl);
-			configuration.setProperty("hibernate.connection.username", username);
-			configuration.setProperty("hibernate.connection.password", password);
-			configuration.setProperty("hibernate.connection.url", dbUrl);
-//			configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5432/MYAPP");
-//			configuration.setProperty("hbm2ddl.auto", "update");
-			configuration.setProperty("hibernate.hbm2ddl.auto", "update");
-			System.out.println("Hibernate Annotation Configuration loaded");
-
-			ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-					.applySettings(configuration.getProperties()).build();
-			System.out.println("Hibernate Annotation serviceRegistry created");
-
-			SessionFactory sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-
-			return sessionFactory;
-		} catch (Throwable ex) {
-			// Make sure you log the exception, as it might be swallowed
-			System.err.println("Initial SessionFactory creation failed." + ex);
-			throw new ExceptionInInitializerError(ex);
-		}
-	}
+//
+//	private static SessionFactory buildSessionFactory() {
+//		try {
+//			// Create the SessionFactory from hibernate.cfg.xml
+//			Configuration configuration = new Configuration();
+//			configuration.configure("hibernate.cfg.xml");
+//			String s = System.getenv("DATABASE_URL");
+//			System.out.println(s);
+//
+//			URI dbUri = new URI(s);
+//
+//			String username = dbUri.getUserInfo().split(":")[0];
+//			String password = dbUri.getUserInfo().split(":")[1];
+//			String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+//			System.out.println(dbUrl);
+//			configuration.setProperty("hibernate.connection.username", username);
+//			configuration.setProperty("hibernate.connection.password", password);
+//			configuration.setProperty("hibernate.connection.url", dbUrl);
+////			configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5432/MYAPP");
+////			configuration.setProperty("hbm2ddl.auto", "update");
+//			configuration.setProperty("hibernate.hbm2ddl.auto", "update");
+//			System.out.println("Hibernate Annotation Configuration loaded");
+//
+//			ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+//					.applySettings(configuration.getProperties()).build();
+//			System.out.println("Hibernate Annotation serviceRegistry created");
+//
+//			SessionFactory sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+//
+//			return sessionFactory;
+//		} catch (Throwable ex) {
+//			// Make sure you log the exception, as it might be swallowed
+//			System.err.println("Initial SessionFactory creation failed." + ex);
+//			throw new ExceptionInInitializerError(ex);
+//		}
+//	}
 }
