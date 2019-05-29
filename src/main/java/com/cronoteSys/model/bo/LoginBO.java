@@ -52,7 +52,7 @@ public class LoginBO {
 
 	public LoginVO loginExists(String sEmail) {
 		if(RestUtil.isConnectedToTheServer()) {
-			return RestUtil.get("").readEntity(LoginVO.class);
+			return RestUtil.get("email_exists?email="+sEmail).readEntity(LoginVO.class);
 		}
 		return new LoginDAO().loginExists(sEmail);
 	}
