@@ -7,6 +7,8 @@ package com.cronoteSys.model.bo;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import com.cronoteSys.model.dao.LoginDAO;
 import com.cronoteSys.model.vo.LoginVO;
 import com.cronoteSys.model.vo.UserVO;
@@ -50,9 +52,11 @@ public class LoginBO {
 		return (user != null && user.getStats() == 1) ? user : null;
 	}
 
-	public LoginVO loginExists(String sEmail) {
+	public Long loginExists(String sEmail) {
 		if(RestUtil.isConnectedToTheServer()) {
-			return RestUtil.get("email_exists?email="+sEmail).readEntity(LoginVO.class);
+			String resp = RestUtil.get("email_exists?email="+sEmail).readEntity(String.class);
+			System.out.println(resp);
+			return Long.valueOf(resp);
 		}
 		return new LoginDAO().loginExists(sEmail);
 	}
