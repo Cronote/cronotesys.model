@@ -46,7 +46,8 @@ public class ExecutionTimeBO {
 	public ExecutionTimeVO finishExecution(ActivityVO ac) {
 		ExecutionTimeVO executionTimeVO = new ExecutionTimeVO();
 		if(RestUtil.isConnectedToTheServer()) {
-			executionTimeVO = RestUtil.get("executionInProgress").readEntity(ExecutionTimeVO.class);
+//			executionTimeVO = RestUtil.get("executionInProgress").readEntity(ExecutionTimeVO.class);
+			executionTimeVO = null;
 		}else {
 			executionTimeVO = execDAO.executionInProgress(ac);
 		}
@@ -62,7 +63,8 @@ public class ExecutionTimeBO {
 		if(RestUtil.isConnectedToTheServer()){
 			Client client = ClientBuilder.newClient();
 			WebTarget target = client.target(RestUtil.host+"listExecutionTimeByActivity?activity="+act);
-			lst =  (List<ExecutionTimeVO>) target.request().get();
+//			lst =  (List<ExecutionTimeVO>) target.request().get();
+			lst =  null;
 		}else {
 			lst = execDAO.listByActivity(act);
 		}
