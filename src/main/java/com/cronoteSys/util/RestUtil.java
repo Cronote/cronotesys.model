@@ -31,6 +31,8 @@ public class RestUtil {
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(host + link);
 		Response response = target.request(MediaType.APPLICATION_JSON).get();
+		if(response.getStatus()==204)
+			return null;
 		return response;
 	}
 
