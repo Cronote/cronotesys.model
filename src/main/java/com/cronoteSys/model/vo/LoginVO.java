@@ -43,7 +43,7 @@ public class LoginVO implements java.io.Serializable {
 
 	@Id
 	@Column(name = "id_login")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="login_id_login_seq")
 	public Integer getIdLogin() {
 		return this.idLogin;
 	}

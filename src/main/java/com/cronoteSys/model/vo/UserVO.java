@@ -75,7 +75,7 @@ public class UserVO implements java.io.Serializable {
 
 	@Id
 	@Column(name = "id_user")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="user_id_user_seq")
 	public Integer getIdUser() {
 		return this.idUser;
 	}
