@@ -38,7 +38,7 @@ public class CategoryBO {
 	public boolean canBeDeleted(CategoryVO categoryVO) {
 		int count = 0;
 		if (RestUtil.isConnectedToTheServer()) {
-			count = Integer.parseInt(RestUtil.get("countByCategory",Long.class).toString()); 
+			count = Integer.parseInt(RestUtil.get("countByCategory").toString()); 
 		} else {
 			count = new ActivityDAO().countByCategory(categoryVO);
 		}
@@ -49,7 +49,7 @@ public class CategoryBO {
 
 	public List<CategoryVO> listAll() {
 		if(RestUtil.isConnectedToTheServer()) {
-			return (List<CategoryVO>) RestUtil.get("listAllCategory",List.class);
+			return (List<CategoryVO>) RestUtil.get("listAllCategory");
 		}
 		return new CategoryDAO().getList();
 	}

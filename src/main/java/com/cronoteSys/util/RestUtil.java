@@ -13,7 +13,7 @@ public class RestUtil {
 
 	public static boolean isConnectedToTheServer() {
 		try {
-			String response = (String) get("connection",String.class);
+			String response = get("connection").readEntity(String.class);
 			System.out.println(response);
 //			if (response.contains("SUCCESS")) {
 //				System.out.println("Online");
@@ -26,11 +26,14 @@ public class RestUtil {
 		return false;
 	}
 
-	public static Object get(String link,Class<?> clazz) {
+	public static Response get(String link) {
 		System.out.println(link);
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(host + link);
-		return target.request(MediaType.APPLICATION_JSON).get().readEntity(clazz);
+		Response response = target.request(MediaType.APPLICATION_JSON).get();
+		if (response.getStatus() == 204)
+			return Response.noContent().build();
+		return response;
 	}
 
 	public static Object post(String link, Class<?> clazz, Object object) {
