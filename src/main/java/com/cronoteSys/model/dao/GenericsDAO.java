@@ -47,10 +47,10 @@ public abstract class GenericsDAO<T, I extends Serializable> {
 		return entityManager.createQuery("select c from " + persistedClass.getSimpleName() + " c").getResultList();
 	}
 
-	public List<T> getList(UserVO user) {
+	public List<T> getList(int id) {
 		Query q = entityManager
-				.createQuery("SELECT p FROM " + persistedClass.getSimpleName() + " p WHERE p.userVO = :user");
-		q.setParameter("user", user);
+				.createQuery("SELECT p FROM " + persistedClass.getSimpleName() + " p WHERE p.userVO.id = :user");
+		q.setParameter("user", id);
 		return q.getResultList();
 	}
 

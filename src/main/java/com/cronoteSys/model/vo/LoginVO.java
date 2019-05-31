@@ -1,5 +1,6 @@
 package com.cronoteSys.model.vo;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -52,7 +54,7 @@ public class LoginVO implements java.io.Serializable {
 		this.idLogin = idLogin;
 	}
 
-	@ManyToOne(optional = false)
+	@OneToOne(optional = false, cascade = CascadeType.ALL,orphanRemoval = true)
 	@JoinColumn(name = "id_user", referencedColumnName = "id_user")
 	@Fetch(FetchMode.SELECT)
 	public UserVO getTbUser() {

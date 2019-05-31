@@ -22,8 +22,11 @@ public class ProjectVO implements java.io.Serializable {
 	private Integer id;
 	private String title;
 	private String description;
+//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime lastModification;
+//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime startDate;
+//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime finishDate;
 	private Integer stats;
 	private UserVO userVO;

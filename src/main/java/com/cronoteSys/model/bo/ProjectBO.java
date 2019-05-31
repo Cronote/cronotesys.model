@@ -1,5 +1,6 @@
 package com.cronoteSys.model.bo;
 
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +13,12 @@ import com.cronoteSys.model.dao.ProjectDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ProjectVO;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 public class ProjectBO {
 
@@ -29,7 +32,8 @@ public class ProjectBO {
 		objProject.setStats(0);
 		objProject.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
-			objProject = (ProjectVO) RestUtil.post("saveProject", ProjectVO.class, objProject);
+			String json = RestUtil.post("saveProject", objProject).readEntity(String.class);
+			objProject = (ProjectVO) GsonUtil.fromJsonAsStringToObject(json, ProjectVO.class);
 		} else {
 			objProject = projectDAO.saveOrUpdate(objProject);
 
@@ -42,7 +46,8 @@ public class ProjectBO {
 	public ProjectVO update(ProjectVO objProject) {
 		objProject.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
-			return (ProjectVO) RestUtil.post("saveProject", ProjectVO.class, objProject);
+			String json = RestUtil.post("saveProject", objProject).readEntity(String.class);
+			return (ProjectVO) GsonUtil.fromJsonAsStringToObject(json, ProjectVO.class);
 		}
 		return projectDAO.saveOrUpdate(objProject);
 	}
@@ -62,19 +67,13 @@ public class ProjectBO {
 	public List<ProjectVO> listAll(UserVO user) {
 		List<ProjectVO> projects = new ArrayList<ProjectVO>();
 		if (RestUtil.isConnectedToTheServer()) {
-			Client client = ClientBuilder.newClient();
-			WebTarget target = client.target(RestUtil.host + "getListProjectByUser?user=" + user);
-			List<ProjectVO> activityVOs = new ArrayList<ProjectVO>();
-			String string = target.request().get().readEntity(String.class);
-			System.out.println(string);
-			JsonArray jsonObject = new JsonParser().parse(string).getAsJsonArray();
-			for (int i = 0; i < jsonObject.size(); i++) {
-				JsonElement element = jsonObject.get(i);
-				System.out.println(element.getAsJsonObject().get("id").getAsInt());
-			}
-			return target.request().get(new ArrayList<ProjectVO>().getClass());
+			String json = RestUtil.get("getListProjectByUser?userid=" + user.getIdUser()).readEntity(String.class);
+			Type projectListType = new TypeToken<List<ProjectVO>>() {
+			}.getType();
+			List<ProjectVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, projectListType);
+			return lst;
 		} else {
-			projects = projectDAO.getList(user);
+			projects = projectDAO.getList(user.getIdUser());
 		}
 		if (!projects.isEmpty() && projects.get(0).getId() == 0)
 			projects.remove(0);

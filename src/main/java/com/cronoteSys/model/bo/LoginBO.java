@@ -10,8 +10,10 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 import com.cronoteSys.model.dao.LoginDAO;
+import com.cronoteSys.model.vo.ExecutionTimeVO;
 import com.cronoteSys.model.vo.LoginVO;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 
 /**
@@ -22,7 +24,8 @@ public class LoginBO {
 
 	public LoginVO save(LoginVO login) {
 		if(RestUtil.isConnectedToTheServer()) {
-			return (LoginVO) RestUtil.post("saveLogin", LoginVO.class, login);
+			String json = RestUtil.post("saveLogin", login).readEntity(String.class);
+			return (LoginVO) GsonUtil.fromJsonAsStringToObject(json, LoginVO.class);
 		}else {
 			return null;
 //			return new LoginDAO().saveOrUpdate(login);
@@ -44,7 +47,8 @@ public class LoginBO {
 	public UserVO login(LoginVO login) {
 		UserVO user = null;
 		if(RestUtil.isConnectedToTheServer()) {
-			user = (UserVO) RestUtil.post("login", UserVO.class, login);
+			String json = RestUtil.post("login", login).readEntity(String.class);
+			user = (UserVO) GsonUtil.fromJsonAsStringToObject(json, UserVO.class);
 			System.out.println("aro");
 		}else {
 			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());

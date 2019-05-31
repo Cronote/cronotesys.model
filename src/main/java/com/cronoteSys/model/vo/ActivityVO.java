@@ -14,7 +14,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -29,10 +28,13 @@ public class ActivityVO implements java.io.Serializable {
 	public Integer id;
 	private String title;
 	private String description;
+//	@JsonDeserialize(using = DurationDeserializer.class)
 	private Duration estimatedTime;
 	private StatusEnum stats;
+//	@JsonDeserialize(using = DurationDeserializer.class)
 	private Duration realtime;
 	private Integer priority;
+//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime lastModification;
 	private UserVO userVO;
 	private ProjectVO projectVO;
@@ -296,4 +298,14 @@ public class ActivityVO implements java.io.Serializable {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "ActivityVO [id=" + id + ", title=" + title + ", description=" + description + ", estimatedTime="
+				+ estimatedTime + ", stats=" + stats + ", realtime=" + realtime + ", priority=" + priority
+				+ ", lastModification=" + lastModification + ", userVO=" + userVO + ", projectVO=" + projectVO
+				+ ", categoryVO=" + categoryVO + ", dependencies=" + dependencies + "]";
+	}
+
+	
+	
 }
