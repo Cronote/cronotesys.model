@@ -26,18 +26,20 @@ public class HibernateUtil {
 
 	private static EntityManager entityManager = null;
 
-	private static final SessionFactory sessionFactory;
+	private static SessionFactory sessionFactory;
 
 	static {
 		try {
 			// Create the SessionFactory from standard (hibernate.cfg.xml)
 			// config file.
-			sessionFactory = new Configuration().configure().buildSessionFactory();
+			sessionFactory = new Configuration().configure("hibernate-remote.cfg.xml").buildSessionFactory();
+			entityManager = sessionFactory.createEntityManager();
 		} catch (Throwable ex) {
 			// Log the exception.
 			System.err.println("Initial SessionFactory creation failed." + ex);
-			throw new ExceptionInInitializerError(ex);
-		}
+			sessionFactory = new Configuration().configure("hibernate-local.cfg.xml").buildSessionFactory();
+			entityManager = sessionFactory.createEntityManager();
+		} 
 	}
 
 	public static EntityManager getEntityManager() {

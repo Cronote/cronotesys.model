@@ -65,7 +65,7 @@ public class LoginVO implements java.io.Serializable {
 		this.tbUser = tbUser;
 	}
 
-	@Column(name = "email", nullable = false)
+	@Column(name = "email", nullable = false, unique = true)
 	public String getEmail() {
 		return this.email;
 	}
