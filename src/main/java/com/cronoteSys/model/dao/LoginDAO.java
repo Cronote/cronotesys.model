@@ -13,7 +13,17 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 	public LoginDAO() {
 		super(LoginVO.class);
 	}
-
+	public boolean changePassword(String email, String password) {
+		entityManager.getTransaction().begin();
+		int changed = entityManager.createQuery("update from LoginVO set passwd=:passwd where email=:email")
+		.setParameter("passwd", password)
+		.setParameter("email", email)
+		.executeUpdate();
+		
+		entityManager.getTransaction().commit();
+		
+		return changed>0;
+	}
 	public List<LoginVO> listAll() {
 		try {
 			List<LoginVO> login;

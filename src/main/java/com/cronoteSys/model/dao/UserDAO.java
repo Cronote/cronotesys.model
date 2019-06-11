@@ -15,34 +15,7 @@ public class UserDAO extends GenericsDAO<UserVO, Integer> {
 		super(UserVO.class);
 	}
 
-	/*
-	 * public boolean save(UserVO user) { session =
-	 * HibernateUtil.getSessionFactory().openSession(); Transaction tx = null; try {
-	 * tx = session.beginTransaction(); session.save(user); tx.commit();//faz a
-	 * transacao session.close(); return true; } catch (Exception e) {
-	 * System.out.println(e.getMessage()); tx.rollback(); } finally {
-	 * session.close(); }
-	 * 
-	 * return false; }
-	 * 
-	 * public boolean update(UserVO user) { session =
-	 * HibernateUtil.getSessionFactory().openSession(); Transaction tx = null; try {
-	 * tx = session.beginTransaction(); session.update(user); tx.commit();//faz a
-	 * transacao session.close(); return true; } catch (Exception e) {
-	 * System.out.println(e.getMessage()); tx.rollback(); } finally {
-	 * session.close(); }
-	 * 
-	 * return false; }
-	 * 
-	 * public boolean delete(UserVO user) { session =
-	 * HibernateUtil.getSessionFactory().openSession(); Transaction tx = null; try {
-	 * tx = session.beginTransaction(); session.delete(user); tx.commit();//faz a
-	 * transacao session.close(); return true; } catch (Exception e) {
-	 * System.out.println(e.getMessage()); tx.rollback(); } finally {
-	 * session.close(); }
-	 * 
-	 * return false; }
-	 */
+	
 
 	public List<UserVO> listAll() {
 		try {

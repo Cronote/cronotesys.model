@@ -13,6 +13,7 @@ import com.cronoteSys.util.HibernateUtil;
 public abstract class GenericsDAO<T, I extends Serializable> {
 
 	// Fonte preciosa https://developer.jboss.org/wiki/GenericDataAccessObjects
+	//TODO: Arrumar o problema de deixar os entityManagers Aberto (sobrecarregando tudo)
 	protected EntityManager entityManager = HibernateUtil.getEntityManager();
 
 	private Class<T> persistedClass;
