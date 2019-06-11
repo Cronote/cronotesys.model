@@ -20,7 +20,6 @@ public class ActivityMonitor {
 		public void actionPerformed(java.awt.event.ActionEvent e) {
 			Platform.runLater(new Runnable() {
 				public void run() {
-					System.out.println("eee");
 					ActivityBO actBo = new ActivityBO();
 					for (ActivityVO activity : lstActivity) {
 						activity = actBo.updateRealTime(activity);

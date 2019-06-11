@@ -1,22 +1,30 @@
 package com.cronoteSys.model.bo;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 
 import com.cronoteSys.filter.ActivityFilter;
 import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.StatusEnum;
+import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
-import com.google.gson.JsonArray;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 public class ActivityBO {
 	ActivityDAO acDAO;
@@ -32,7 +40,8 @@ public class ActivityBO {
 		activityVO.setRealtime(Duration.ZERO);
 		activityVO.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
-			activityVO = (ActivityVO) RestUtil.post("saveActivity", ActivityVO.class, activityVO);
+			String json = RestUtil.post("saveActivity", activityVO).readEntity(String.class);
+			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
 		} else {
 			activityVO = acDAO.saveOrUpdate(activityVO);
 		}
@@ -71,8 +80,10 @@ public class ActivityBO {
 
 		}
 		ac.setStats(stats);
-		if (RestUtil.isConnectedToTheServer())
-			return (ActivityVO) RestUtil.post("saveActivity", ActivityVO.class, ac);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.post("saveActivity", ac).readEntity(String.class);
+			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+		}
 		return acDAO.saveOrUpdate(ac);
 	}
 
@@ -80,38 +91,39 @@ public class ActivityBO {
 		ac.setStats(stats);
 		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
 			return breakStatus(ac);
-		if (RestUtil.isConnectedToTheServer())
-			return (ActivityVO) RestUtil.post("saveActivity", ActivityVO.class, ac);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.post("saveActivity", ac).readEntity(String.class);
+			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+		}
 		return acDAO.saveOrUpdate(ac);
 	}
 
 	public ActivityVO updateRealTime(ActivityVO ac) {
 		Duration realTime = new ExecutionTimeBO().getRealTime(ac);
+		System.out.println(realTime);
 		ac.setRealtime(realTime);
 		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
 			ac = breakStatus(ac);
-		if (RestUtil.isConnectedToTheServer())
-			return (ActivityVO) RestUtil.post("saveActivity", ActivityVO.class, ac);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.post("saveActivity", ac).readEntity(String.class);
+			System.out.println(json);
+			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+		}
 		return acDAO.saveOrUpdate(ac);
 
 	}
+
 	public List<ActivityVO> listAll(ActivityFilter filter) {
 		if (RestUtil.isConnectedToTheServer()) {
-			Client client = ClientBuilder.newClient();
-            WebTarget target = client.target(RestUtil.host+"getActivityList?filter="+filter);
-            List<ActivityVO> activityVOs = new ArrayList<ActivityVO>();
-            String string = target.request().get().readEntity(String.class);
-            System.out.println(string);
-            JsonArray jsonObject = new JsonParser().parse(string).getAsJsonArray();
-            for (int i = 0; i < jsonObject.size(); i++) {
-                JsonElement element = jsonObject.get(i);
-                System.out.println(element.getAsJsonObject().get("id").getAsInt());
-            }
-			return target.request().get(new ArrayList<ActivityVO>().getClass());
+			String filterJsonEncoded = URLEncoder.encode(new Gson().toJson(filter));
+			String json = RestUtil.get("getActivityList?filter=" + filterJsonEncoded).readEntity(String.class);
+			Type activityListType = new TypeToken<List<ActivityVO>>() {
+			}.getType();
+			List<ActivityVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, activityListType);
+			return lst;
 		}
 		return acDAO.getFiltredList(filter);
 	}
-
 
 	private static ArrayList<OnActivityAddedI> activityAddedListeners = new ArrayList<OnActivityAddedI>();
 

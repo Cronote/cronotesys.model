@@ -7,9 +7,13 @@ package com.cronoteSys.model.bo;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import com.cronoteSys.model.dao.LoginDAO;
+import com.cronoteSys.model.vo.ExecutionTimeVO;
 import com.cronoteSys.model.vo.LoginVO;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 
 /**
@@ -20,10 +24,10 @@ public class LoginBO {
 
 	public LoginVO save(LoginVO login) {
 		if(RestUtil.isConnectedToTheServer()) {
-			return (LoginVO) RestUtil.post("saveLogin", LoginVO.class, login);
+			String json = RestUtil.post("saveLogin", login).readEntity(String.class);
+			return (LoginVO) GsonUtil.fromJsonAsStringToObject(json, LoginVO.class);
 		}else {
-			return null;
-//			return new LoginDAO().saveOrUpdate(login);
+			return new LoginDAO().saveOrUpdate(login);
 		}
 	}
 
@@ -42,7 +46,8 @@ public class LoginBO {
 	public UserVO login(LoginVO login) {
 		UserVO user = null;
 		if(RestUtil.isConnectedToTheServer()) {
-			user = (UserVO) RestUtil.post("login", UserVO.class, login);
+			String json = RestUtil.post("login", login).readEntity(String.class);
+			user = (UserVO) GsonUtil.fromJsonAsStringToObject(json, UserVO.class);
 			System.out.println("aro");
 		}else {
 			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
@@ -50,37 +55,22 @@ public class LoginBO {
 		return (user != null && user.getStats() == 1) ? user : null;
 	}
 
-	public LoginVO loginExists(String sEmail) {
+	public Long loginExists(String sEmail) {
 		if(RestUtil.isConnectedToTheServer()) {
-			return RestUtil.get("email_exists?email="+sEmail).readEntity(LoginVO.class);
+			String resp = RestUtil.get("email_exists?email="+sEmail).readEntity(String.class);
+			System.out.println(resp);
+			return Long.valueOf(resp);
 		}
 		return new LoginDAO().loginExists(sEmail);
 	}
 
-	public boolean validatePassword(String passwd) {
-		boolean bHaveNumber = false;
-		boolean bHaveSpecialChar = false;
-		for (char c : passwd.toCharArray()) {
-			if ("0123456789".contains(c + "")) {
-				bHaveNumber = true;
-				break;
-			}
-		}
-		if (!passwd.matches(".*[a-z]+.*"))
-			return false; // n tem letra
-		if (!passwd.matches(".*[A-Z]+.*"))
-			return false; // n tem LETRA
-		for (char c : passwd.toCharArray()) {
-			if ("#@/\\\\%$&*!?<>.-_)(".contains(c + "")) {
-				bHaveSpecialChar = true;
-			}
-		}
-		if (!(bHaveNumber && bHaveSpecialChar))
-			return false;
-		return true;
-	}
 	
 	public LoginVO getLogin(UserVO user) {
 		return new LoginDAO().loginByUser(user);
+	}
+
+	public void changePassword(String text, String sPassPureText) {
+		// TODO Auto-generated method stub
+		
 	}
 }

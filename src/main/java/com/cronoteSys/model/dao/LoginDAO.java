@@ -49,26 +49,22 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 		return null;
 	}
 
-	public LoginVO loginExists(String sEmail) {
+	public Long loginExists(String sEmail) {
 		try {
-			List<LoginVO> login = entityManager
-					.createNativeQuery("SELECT * FROM tb_login WHERE email = '" + sEmail + "';", LoginVO.class)
-					.getResultList();
-			if (login.size() > 0) {
-				return login.get(0);
-			}
+			return entityManager
+					.createQuery("SELECT count(l) FROM LoginVO l WHERE email =:email", Long.class)
+					.setParameter("email", sEmail)
+					.getSingleResult();
 
 		} catch (Exception e) {
 			System.out.println("Erro na verificação de email: " + e.getMessage());
 		}
-		return null;
+		return 0L;
 	}
-	
+
 	public LoginVO loginByUser(UserVO u) {
 		try {
-			List<LoginVO> login = entityManager
-					.createQuery("from LoginVO where tbUser=:user")
-					.setParameter("user", u)
+			List<LoginVO> login = entityManager.createQuery("from LoginVO where tbUser=:user").setParameter("user", u)
 					.getResultList();
 			if (login.size() > 0) {
 				return login.get(0);

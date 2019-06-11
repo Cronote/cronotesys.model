@@ -15,25 +15,24 @@ public class ExecutionTimeDAO extends GenericsDAO<ExecutionTimeVO, Integer> {
 		super(ExecutionTimeVO.class);
 	}
 
-	public List<ExecutionTimeVO> listByActivity(ActivityVO activityVO) {
-		Query q = entityManager.createQuery(
-				"SELECT p FROM " + ExecutionTimeVO.class.getSimpleName() + " p WHERE p.activityVO = :activity");
-		q.setParameter("activity", activityVO);
-		return q.getResultList();
+	public List<ExecutionTimeVO> listByActivity(int activityID) {
+		Query q = entityManager
+				.createQuery("select p FROM ExecutionTimeVO p where p.activityVO.id=:activity ",ExecutionTimeVO.class);
+		q.setParameter("activity", activityID);
+		 List<ExecutionTimeVO> lst = q.getResultList();
+		return lst;
 	}
 
 	public int executionInProgressByUser(UserVO userVO) {
-		Query q = entityManager.createQuery("SELECT p FROM " + ExecutionTimeVO.class.getSimpleName()
-				+ " p WHERE p.finishDate = null and p.activityVO.userVO = :user");
+		Query q = entityManager.createQuery("SELECT p FROM ExecutionTimeVO p WHERE p.finishDate = null and p.activityVO.userVO = :user",ExecutionTimeVO.class);
 		q.setParameter("user", userVO);
 		return q.getResultList().size();
 
 	}
 
-	public ExecutionTimeVO executionInProgress(ActivityVO activityVO) {
-		Query q = entityManager.createQuery("SELECT p FROM " + ExecutionTimeVO.class.getSimpleName()
-				+ " p WHERE p.activityVO = :activity and p.finishDate = null");
-		q.setParameter("activity", activityVO);
+	public ExecutionTimeVO executionInProgress(int activityID) {
+		Query q = entityManager.createQuery("SELECT p FROM ExecutionTimeVO p WHERE p.activityVO.id = :activity and p.finishDate = null",ExecutionTimeVO.class);
+		q.setParameter("activity", activityID);
 		try {
 			return (ExecutionTimeVO) q.getSingleResult();
 		} catch (NoResultException e) {

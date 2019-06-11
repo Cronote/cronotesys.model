@@ -23,9 +23,9 @@ public class ActivityDAO extends GenericsDAO<ActivityVO, Integer> {
 		super(ActivityVO.class);
 	}
 
-	public Integer countByCategory(CategoryVO cat) {
-		return entityManager.createQuery("From ActivityVO a where a.categoryVO = :category")
-				.setParameter("category", cat).getResultList().size();
+	public Integer countByCategory(int catId) {
+		return entityManager.createQuery("From ActivityVO a where a.categoryVO.id = :category")
+				.setParameter("category", catId).getResultList().size();
 	}
 
 	public List<ActivityVO> getList(UserVO user, ProjectVO proj) {

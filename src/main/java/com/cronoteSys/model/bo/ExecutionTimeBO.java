@@ -1,5 +1,6 @@
 package com.cronoteSys.model.bo;
 
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,7 +13,9 @@ import javax.ws.rs.client.WebTarget;
 import com.cronoteSys.model.dao.ExecutionTimeDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ExecutionTimeVO;
+import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
+import com.google.gson.reflect.TypeToken;
 
 public class ExecutionTimeBO {
 
@@ -31,8 +34,9 @@ public class ExecutionTimeBO {
 			ExecutionTimeVO exec = new ExecutionTimeVO();
 			exec.setActivityVO(ac);
 			exec.setStartDate(LocalDateTime.now());
-			if(RestUtil.isConnectedToTheServer()) {
-				return (ExecutionTimeVO) RestUtil.post("saveExecutionTime", ExecutionTimeVO.class, exec);
+			if (RestUtil.isConnectedToTheServer()) {
+				String json = RestUtil.post("saveExecutionTime", exec).readEntity(String.class);
+				return (ExecutionTimeVO) GsonUtil.fromJsonAsStringToObject(json, ExecutionTimeVO.class);
 			}
 			return execDAO.saveOrUpdate(exec);
 		} else {
@@ -45,26 +49,31 @@ public class ExecutionTimeBO {
 
 	public ExecutionTimeVO finishExecution(ActivityVO ac) {
 		ExecutionTimeVO executionTimeVO = new ExecutionTimeVO();
-		if(RestUtil.isConnectedToTheServer()) {
-			executionTimeVO = RestUtil.get("executionInProgress").readEntity(ExecutionTimeVO.class);
-		}else {
-			executionTimeVO = execDAO.executionInProgress(ac);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("executionInProgress?activityID=" + ac.getId()).readEntity(String.class);
+			executionTimeVO = (ExecutionTimeVO) GsonUtil.fromJsonAsStringToObject(json, ExecutionTimeVO.class);
+		} else {
+			executionTimeVO = execDAO.executionInProgress(ac.getId());
 		}
 		executionTimeVO.setFinishDate(LocalDateTime.now());
-		if(RestUtil.isConnectedToTheServer()) {
-			return (ExecutionTimeVO) RestUtil.post("saveExecutionTime", ExecutionTimeVO.class, executionTimeVO);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.post("saveExecutionTime", executionTimeVO).readEntity(String.class);
+			return (ExecutionTimeVO) GsonUtil.fromJsonAsStringToObject(json, ExecutionTimeVO.class);
 		}
 		return execDAO.saveOrUpdate(executionTimeVO);
 	}
 
 	public Duration getRealTime(ActivityVO act) {
 		List<ExecutionTimeVO> lst = new ArrayList<ExecutionTimeVO>();
-		if(RestUtil.isConnectedToTheServer()){
-			Client client = ClientBuilder.newClient();
-			WebTarget target = client.target(RestUtil.host+"listExecutionTimeByActivity?activity="+act);
-			lst =  (List<ExecutionTimeVO>) target.request().get();
-		}else {
-			lst = execDAO.listByActivity(act);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("listExecutionTimeByActivity?activityID=" + act.getId()).readEntity(String.class);
+			Type executionTimeListType = new TypeToken<List<ExecutionTimeVO>>() {
+			}.getType();
+			System.out.println(json);
+			lst = GsonUtil.getGsonWithJavaTime().fromJson(json, executionTimeListType);
+			System.out.println(lst.size());
+		} else {
+			lst = execDAO.listByActivity(act.getId());
 		}
 		Duration sum = Duration.ZERO;
 		if (lst.size() == 0)
@@ -81,6 +90,7 @@ public class ExecutionTimeBO {
 		if (execInProgress != null) {
 			sum = sum.plus(Duration.between(execInProgress.getStartDate(), LocalDateTime.now()));
 		}
+		System.out.println(sum);
 		return sum;
 	}
 

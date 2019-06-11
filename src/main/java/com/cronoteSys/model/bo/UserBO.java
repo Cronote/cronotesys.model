@@ -5,11 +5,13 @@
  */
 package com.cronoteSys.model.bo;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 import com.cronoteSys.model.dao.UserDAO;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 
 /**
@@ -24,9 +26,10 @@ public class UserBO {
 	}
 
 	public UserVO save(UserVO user) {
-		if (user.getRegisterDate() == null) user.setRegisterDate(new Date());
+		if (user.getRegisterDate() == null) user.setRegisterDate(LocalDateTime.now());
 		if(RestUtil.isConnectedToTheServer()) {
-			user = (UserVO) RestUtil.post("saveUser", UserVO.class, user);
+			String json = RestUtil.post("saveUser", user).readEntity(String.class);
+			user = (UserVO) GsonUtil.fromJsonAsStringToObject(json, UserVO.class);
 		}
 		user = userDao.saveOrUpdate(user);
 		return user;
