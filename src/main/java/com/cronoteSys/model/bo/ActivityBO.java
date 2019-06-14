@@ -41,16 +41,23 @@ public class ActivityBO {
 		activityVO.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveActivity", activityVO).readEntity(String.class);
-			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+			activityVO = (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
 		} else {
 			activityVO = acDAO.saveOrUpdate(activityVO);
 		}
-		notifyAllActivityAddedListeners(activityVO);
+		notifyAllActivityAddedListeners(activityVO,"save");
 		return activityVO;
 	}
 
 	public ActivityVO update(ActivityVO activityVO) {
-		return acDAO.saveOrUpdate(activityVO);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.post("saveActivity", activityVO).readEntity(String.class);
+			activityVO = (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+		} else {
+			activityVO = acDAO.saveOrUpdate(activityVO);
+		}
+		notifyAllActivityAddedListeners(activityVO,"update");
+		return activityVO;
 	}
 
 	public void delete(ActivityVO activityVO) {
@@ -128,7 +135,7 @@ public class ActivityBO {
 	private static ArrayList<OnActivityAddedI> activityAddedListeners = new ArrayList<OnActivityAddedI>();
 
 	public interface OnActivityAddedI {
-		void onActivityAddedI(ActivityVO act);
+		void onActivityAddedI(ActivityVO act,String action);
 	}
 
 	public static void addOnActivityAddedIListener(OnActivityAddedI newListener) {
@@ -139,9 +146,9 @@ public class ActivityBO {
 		activityAddedListeners.remove(newListener);
 	}
 
-	private void notifyAllActivityAddedListeners(ActivityVO act) {
+	private void notifyAllActivityAddedListeners(ActivityVO act,String action) {
 		for (OnActivityAddedI l : activityAddedListeners) {
-			l.onActivityAddedI(act);
+			l.onActivityAddedI(act,action);
 		}
 	}
 
