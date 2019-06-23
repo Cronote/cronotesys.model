@@ -49,7 +49,7 @@ public class LoginBO {
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("login", login).readEntity(String.class);
 			user = (UserVO) GsonUtil.fromJsonAsStringToObject(json, UserVO.class);
-			System.out.println("aro");
+			System.out.println(json);
 		} else {
 			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
 		}
@@ -71,11 +71,14 @@ public class LoginBO {
 
 	public boolean changePassword(String email, String sPassPureText) {
 		String passwordEncrypted = new GenHash().hashIt(sPassPureText);
-		if (!RestUtil.isConnectedToTheServer()) {
-//			TODO: fazer a função pela API e tirar a negação do if(!)
+		if (RestUtil.isConnectedToTheServer()) {
+			String infos = email + ";" + passwordEncrypted;
+			String json = RestUtil.post("passwordChange", infos).readEntity(String.class);
+			Integer p = (Integer) GsonUtil.fromJsonAsStringToObject(json, Integer.class);
+
+			return p > 0;
 		} else {
-			return new LoginDAO().changePassword(email, passwordEncrypted);
+			return new LoginDAO().changePassword(email, passwordEncrypted) > 0;
 		}
-		return false;
 	}
 }

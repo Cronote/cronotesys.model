@@ -13,17 +13,15 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 	public LoginDAO() {
 		super(LoginVO.class);
 	}
-	public boolean changePassword(String email, String password) {
-		entityManager.getTransaction().begin();
-		int changed = entityManager.createQuery("update from LoginVO set passwd=:passwd where email=:email")
-		.setParameter("passwd", password)
-		.setParameter("email", email)
-		.executeUpdate();
-		
-		entityManager.getTransaction().commit();
-		
-		return changed>0;
+
+	public int changePassword(String email, String password) {
+		LoginVO l = (LoginVO) entityManager.createQuery("From LoginVO where email=:email", LoginVO.class)
+				.setParameter("email", email).getSingleResult();
+		l.setPasswd(password);
+		entityManager.merge(l);
+		return l.getIdLogin() != null ? 1 : 0;
 	}
+
 	public List<LoginVO> listAll() {
 		try {
 			List<LoginVO> login;
@@ -54,17 +52,15 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 			}
 
 		} catch (Exception e) {
-			System.out.println("Erro de verificação de usuario: " + e.getMessage());
+			System.out.println("Erro de verificaï¿½ï¿½o de usuario: " + e.getMessage());
 		}
 		return null;
 	}
 
 	public Long loginExists(String sEmail) {
 		try {
-			return entityManager
-					.createQuery("SELECT count(l) FROM LoginVO l WHERE email =:email", Long.class)
-					.setParameter("email", sEmail)
-					.getSingleResult();
+			return entityManager.createQuery("SELECT count(l) FROM LoginVO l WHERE email =:email", Long.class)
+					.setParameter("email", sEmail).getSingleResult();
 
 		} catch (Exception e) {
 			System.out.println("Erro na verificaÃ§Ã£o de email: " + e.getMessage());
@@ -81,7 +77,7 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 			}
 
 		} catch (Exception e) {
-			System.out.println("Erro na verificação de Usuario: " + e.getMessage());
+			System.out.println("Erro na verificaï¿½ï¿½o de Usuario: " + e.getMessage());
 		}
 		return null;
 	}
