@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.cronoteSys.model.dao.UserDAO;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.model.vo.view.SimpleUser;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 
@@ -26,27 +27,15 @@ public class UserBO {
 	}
 
 	public UserVO save(UserVO user) {
-		if (user.getRegisterDate() == null) user.setRegisterDate(LocalDateTime.now());
-		if(RestUtil.isConnectedToTheServer()) {
+		if (user.getRegisterDate() == null)
+			user.setRegisterDate(LocalDateTime.now());
+		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveUser", user).readEntity(String.class);
 			user = (UserVO) GsonUtil.fromJsonAsStringToObject(json, UserVO.class);
 		}
 		user = userDao.saveOrUpdate(user);
 		return user;
 	}
-
-//	public void update(UserVO user) {
-//		userDao.saveOrUpdate(user);
-//	}
-
-//    public boolean activateOrInactivate(UserVO user) {
-//        if (user.getStats() == 1) { //ativado
-//            user.setStats(Byte.valueOf("0"));
-//        } else { // desativado
-//            user.setStats(Byte.valueOf("1"));
-//        }
-//        return new UserDAO().update(user);
-//    }
 
 	public void delete(UserVO user) {
 		userDao.delete(user.getIdUser());
@@ -55,5 +44,10 @@ public class UserBO {
 
 	public List<UserVO> listAll() {
 		return userDao.listAll();
+	}
+
+	public List<SimpleUser> findByNameOrEmail(String search, Integer loggedUserId) {
+
+		return userDao.findByNameOrEmail(search.toLowerCase(),loggedUserId);
 	}
 }
