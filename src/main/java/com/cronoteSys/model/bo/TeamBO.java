@@ -5,12 +5,17 @@
  */
 package com.cronoteSys.model.bo;
 
+import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.util.List;
 
 import com.cronoteSys.model.dao.TeamDAO;
+import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.TeamVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  *
@@ -37,6 +42,17 @@ public class TeamBO {
 
 	public List<TeamVO> listAll() {
 		return new TeamDAO().listAll();
+	}
+
+	public List<TeamVO> listByUserOwnerOrMember(int userId) {
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("getListTeamsByUser?userId=" + userId).readEntity(String.class);
+			Type teamListType = new TypeToken<List<TeamVO>>() {
+			}.getType();
+			List<TeamVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, teamListType);
+			return lst;
+		}
+		return new TeamDAO().listByUserOwnerOrMember(userId);
 	}
 
 }
