@@ -1,6 +1,10 @@
 package com.cronoteSys.model.vo;
 
+import javax.xml.bind.annotation.XmlAccessorType;
+
+@XmlAccessorType
 public class EmailVO {
+	
 	private String[] receiver;
 	private String message;
 	private String subject;
