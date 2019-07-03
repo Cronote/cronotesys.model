@@ -1,10 +1,13 @@
 package com.cronoteSys.model.vo;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAccessorType;
 
 @XmlAccessorType
-public class EmailVO {
+public class EmailVO implements Serializable {
 	
+	private static final long serialVersionUID = -874021342021543462L;
 	private String[] receiver;
 	private String message;
 	private String subject;
