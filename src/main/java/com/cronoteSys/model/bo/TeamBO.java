@@ -7,8 +7,12 @@ package com.cronoteSys.model.bo;
 
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.cronoteSys.model.bo.ActivityBO.OnActivityAddedI;
+import com.cronoteSys.model.bo.ActivityBO.OnActivityDeletedI;
+import com.cronoteSys.model.dao.GenericsDAO;
 import com.cronoteSys.model.dao.TeamDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.TeamVO;
@@ -23,24 +27,55 @@ import com.google.gson.reflect.TypeToken;
  */
 public class TeamBO {
 
-	public TeamVO save(TeamVO team) {
+	public void save(TeamVO team) {
+
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveTeam", team).readEntity(String.class);
-			return (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
+			team = (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
 		} else {
-			return new TeamDAO().saveOrUpdate(team);
+			team = new TeamDAO().saveOrUpdate(team);
 		}
+		notifyAllTeamAddedListeners(team, "added");
 	}
 
 	public void update(TeamVO team) {
-		new TeamDAO().saveOrUpdate(team);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.post("saveTeam", team).readEntity(String.class);
+			team = (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
+		} else {
+			team = new TeamDAO().saveOrUpdate(team);
+		}
+		notifyAllTeamAddedListeners(team, "updated");
+	}
+
+	public void update(TeamVO team, String action) {
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.post("saveTeam", team).readEntity(String.class);
+			team = (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
+		} else {
+			team = new TeamDAO().saveOrUpdate(team);
+		}
+		if (action.equals("leaving"))
+			notifyAllTeamDeletedListeners(team);
 	}
 
 	public void delete(TeamVO team) {
-		new TeamDAO().delete(team.getId());
+		if (RestUtil.isConnectedToTheServer()) {
+			RestUtil.delete("deleteTeam", team.getId());
+		} else {
+			new TeamDAO().delete(team.getId());
+		}
+		notifyAllTeamDeletedListeners(team);
 	}
 
 	public List<TeamVO> listAll() {
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("listAllTeam").readEntity(String.class);
+			Type teamListType = new TypeToken<List<TeamVO>>() {
+			}.getType();
+			List<TeamVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, teamListType);
+			return lst;
+		}
 		return new TeamDAO().listAll();
 	}
 
@@ -53,6 +88,46 @@ public class TeamBO {
 			return lst;
 		}
 		return new TeamDAO().listByUserOwnerOrMember(userId);
+	}
+
+	private static ArrayList<OnTeamAddedI> teamAddedListeners = new ArrayList<OnTeamAddedI>();
+
+	public interface OnTeamAddedI {
+		void onTeamAddedI(TeamVO team, String action);
+	}
+
+	public static void addOnTeamAddedIListener(OnTeamAddedI newListener) {
+		teamAddedListeners.add(newListener);
+	}
+
+	public static void removeOnTeamAddedIListener(OnTeamAddedI newListener) {
+		teamAddedListeners.remove(newListener);
+	}
+
+	private void notifyAllTeamAddedListeners(TeamVO team, String action) {
+		for (OnTeamAddedI l : teamAddedListeners) {
+			l.onTeamAddedI(team, action);
+		}
+	}
+
+	private static ArrayList<OnTeamDeletedI> teamDeletedListeners = new ArrayList<OnTeamDeletedI>();
+
+	public interface OnTeamDeletedI {
+		void onTeamDeleted(TeamVO team);
+	}
+
+	public static void addOnTeamDeletedListener(OnTeamDeletedI newListener) {
+		teamDeletedListeners.add(newListener);
+	}
+
+	public static void removeOnTeamDeletedListener(OnTeamDeletedI newListener) {
+		teamDeletedListeners.remove(newListener);
+	}
+
+	private void notifyAllTeamDeletedListeners(TeamVO team) {
+		for (OnTeamDeletedI l : teamDeletedListeners) {
+			l.onTeamDeleted(team);
+		}
 	}
 
 }

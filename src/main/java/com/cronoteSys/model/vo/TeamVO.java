@@ -15,7 +15,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.cronoteSys.model.vo.view.SimpleUser;
 
 @Entity
 @Table(name = "tb_team")
@@ -27,7 +30,24 @@ public class TeamVO implements java.io.Serializable {
 	private String name;
 	private String desc;
 	private UserVO owner;
+	private String teamColor;
 	private List<UserVO> members;
+	@Transient
+	private List<SimpleUser> membersSimpleUser;
+
+	public TeamVO() {
+
+	}
+
+	public TeamVO(Long id, String name, String desc, UserVO owner, String teamColor, List<UserVO> members) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.desc = desc;
+		this.owner = owner;
+		this.teamColor = teamColor;
+		this.members = members;
+	}
 
 	@Id
 	@Column(name = "id")
@@ -67,9 +87,17 @@ public class TeamVO implements java.io.Serializable {
 		this.owner = owner;
 	}
 
+	@Column(nullable = false)
+	public String getTeamColor() {
+		return teamColor;
+	}
+
+	public void setTeamColor(String teamColor) {
+		this.teamColor = teamColor;
+	}
+
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "tbrel_team_user", joinColumns = @JoinColumn(referencedColumnName = "id", name = "id_team"),
-	inverseJoinColumns = @JoinColumn(referencedColumnName = "id_user", name = "id_member"))
+	@JoinTable(name = "tbrel_team_user", joinColumns = @JoinColumn(referencedColumnName = "id", name = "id_team"), inverseJoinColumns = @JoinColumn(referencedColumnName = "id_user", name = "id_member"))
 	public List<UserVO> getMembers() {
 		return members;
 	}
@@ -119,6 +147,14 @@ public class TeamVO implements java.io.Serializable {
 		} else if (!owner.equals(other.owner))
 			return false;
 		return true;
+	}
+	@Transient
+	public List<SimpleUser> getMembersSimpleUser() {
+		return membersSimpleUser;
+	}
+
+	public void setMembersSimpleUser(List<SimpleUser> membersSimpleUser) {
+		this.membersSimpleUser = membersSimpleUser;
 	}
 
 }

@@ -49,4 +49,9 @@ public class RestUtil {
 		WebTarget target = client.target(host + link + "?id=" + id);
 		return target.request().delete();
 	}
+	public static Object delete(String link, long id) {
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(host + link + "?id=" + id);
+		return target.request().delete();
+	}
 }

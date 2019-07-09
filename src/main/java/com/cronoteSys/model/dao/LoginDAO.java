@@ -14,6 +14,11 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 		super(LoginVO.class);
 	}
 
+	public String getEmailFromUser(Integer userId) {
+		return entityManager.createQuery("Select l.email from LoginVO l where l.tbUser.id=" + userId)
+				.getResultList().get(0).toString();
+	}
+
 	public int changePassword(String email, String password) {
 		LoginVO l = (LoginVO) entityManager.createQuery("From LoginVO where email=:email", LoginVO.class)
 				.setParameter("email", email).getSingleResult();
