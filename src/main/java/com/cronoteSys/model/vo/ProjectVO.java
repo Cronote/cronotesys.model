@@ -30,6 +30,7 @@ public class ProjectVO implements java.io.Serializable {
 	private LocalDateTime finishDate;
 	private Integer stats;
 	private UserVO userVO;
+	private TeamVO team;
 
 	public ProjectVO() {
 
@@ -120,6 +121,16 @@ public class ProjectVO implements java.io.Serializable {
 
 	public void setUserVO(UserVO userVO) {
 		this.userVO = userVO;
+	}
+
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "id_team", referencedColumnName = "id")
+	public TeamVO getTeam() {
+		return team;
+	}
+
+	public void setTeam(TeamVO team) {
+		this.team = team;
 	}
 
 	@Override
