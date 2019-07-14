@@ -139,16 +139,17 @@ public class ActivityBO {
 
 		List<ActivityVO> lstAux = new ArrayList<ActivityVO>();
 		boolean continueWhile = true;
-		boolean activitiesBlowLimitDuration = false;
+		boolean activitiesBlowLimitDuration = true;
 		while (continueWhile) {
-			for (ActivityVO act : lstAux) {
+			for (ActivityVO act : lst) {
+//				System.out.println(act.getTitle());
 				act.getDependencies().removeAll(lstAux);
 				if (!lstAux.contains(act)) {
 					if (act.getDependencies().isEmpty()) {
 						if (sum.plus(act.getEstimatedTime()).compareTo(limitDuration.plusSeconds(1)) > -1) {
-							if (activitiesBlowLimitDuration)
+							if (!activitiesBlowLimitDuration)
 								continueWhile = false;
-							activitiesBlowLimitDuration = true;
+							activitiesBlowLimitDuration = false;
 						} else {
 							sum = sum.plus(act.getEstimatedTime());
 							lstAux.add(act);
