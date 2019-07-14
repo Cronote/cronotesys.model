@@ -40,11 +40,27 @@ public class ActivityVO implements java.io.Serializable {
 	private ProjectVO projectVO;
 	private CategoryVO categoryVO;
 	private List<ActivityVO> dependencies;
-
+	/**
+	 * empty constructor
+	 * 
+	 * */
 	public ActivityVO() {
 
 	}
-
+	/**
+	 * Constructor with not null properties
+	 * @param idActivity -> an int
+	 * @param title -> a String
+	 * @param estimatedTime -> a {@link Duration} of time to do this activity
+	 * @param stats -> a {@link #StatusEnum} wich is the status of this activity
+	 * @param realtime -> a {@link #Duration} the real time used to have this activity done
+	 * @param priority -> a int to describe the priority of this activity
+	 * @param lastModification -> a {@link #LocalDateTime} to describe when was the last change in this register
+	 * @param userVO -> {@link #UserVO} owner 
+	 * @param projectVO -> {@link #ProjectVO} 
+	 * @param categoryVO -> {@link #CategoryVO} 
+	 * 
+	 * */
 	public ActivityVO(int idActivity, String title, Duration estimatedTime, StatusEnum stats, Duration realtime,
 			Integer priority, LocalDateTime lastModification, UserVO userVO, ProjectVO projectVO,
 			CategoryVO categoryVO) {
@@ -60,11 +76,35 @@ public class ActivityVO implements java.io.Serializable {
 		this.categoryVO = categoryVO;
 	}
 
+	/**
+	 *  
+	 * Constructor from a {@link #SimpleActivity} object
+	 * 
+	 * */
 	public ActivityVO(SimpleActivity sa) {
 		this.id = sa.getId();
 		this.title = sa.getTitle();
 		this.priority = sa.getPriority();
 		this.categoryVO = sa.getCategoryVO();
+	}
+	
+	/**
+	 * Copy constructor
+	 * Starts another instance of activity with the same values
+	 * */
+	public ActivityVO(ActivityVO activity) {
+		this.id = activity.id;
+		this.title = activity.title;
+		this.description = activity.description;
+		this.estimatedTime = activity.estimatedTime;
+		this.stats = activity.stats;
+		this.realtime = activity.realtime;
+		this.priority = activity.priority;
+		this.lastModification = activity.lastModification;
+		this.categoryVO = activity.categoryVO;
+		this.userVO = activity.userVO;
+		this.projectVO = activity.projectVO;
+		this.dependencies = activity.dependencies;
 	}
 
 	@Id
@@ -216,6 +256,8 @@ public class ActivityVO implements java.io.Serializable {
 		}
 	}
 
+	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

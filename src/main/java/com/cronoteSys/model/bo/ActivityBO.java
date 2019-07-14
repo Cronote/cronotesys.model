@@ -11,6 +11,8 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Transient;
+
 import com.cronoteSys.filter.ActivityFilter;
 import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.vo.ActivityVO;
@@ -45,7 +47,7 @@ public class ActivityBO {
 		} else {
 			activityVO = acDAO.saveOrUpdate(activityVO);
 		}
-		notifyAllActivityAddedListeners(activityVO,"save");
+		notifyAllActivityAddedListeners(activityVO, "save");
 		return activityVO;
 	}
 
@@ -56,7 +58,7 @@ public class ActivityBO {
 		} else {
 			activityVO = acDAO.saveOrUpdate(activityVO);
 		}
-		notifyAllActivityAddedListeners(activityVO,"update");
+		notifyAllActivityAddedListeners(activityVO, "update");
 		return activityVO;
 	}
 
@@ -132,10 +134,44 @@ public class ActivityBO {
 		return acDAO.getFiltredList(filter);
 	}
 
+	public Object[] timeToComplete(List<ActivityVO> lst, Duration limitDuration) {
+		Duration sum = Duration.ZERO;
+
+		List<ActivityVO> lstAux = new ArrayList<ActivityVO>();
+		boolean continueWhile = true;
+		boolean activitiesBlowLimitDuration = false;
+		while (continueWhile) {
+			for (ActivityVO act : lstAux) {
+				act.getDependencies().removeAll(lstAux);
+				if (!lstAux.contains(act)) {
+					if (act.getDependencies().isEmpty()) {
+						if (sum.plus(act.getEstimatedTime()).compareTo(limitDuration.plusSeconds(1)) > -1) {
+							if (activitiesBlowLimitDuration)
+								continueWhile = false;
+							activitiesBlowLimitDuration = true;
+						} else {
+							sum = sum.plus(act.getEstimatedTime());
+							lstAux.add(act);
+						}
+					} else {
+						continue;
+					}
+				}
+
+			}
+			if (lstAux.size() == lst.size()) {
+				continueWhile = false;
+			}
+		}
+		Object[] ob = { sum, lstAux.size() };
+		return ob;
+
+	}
+
 	private static ArrayList<OnActivityAddedI> activityAddedListeners = new ArrayList<OnActivityAddedI>();
 
 	public interface OnActivityAddedI {
-		void onActivityAddedI(ActivityVO act,String action);
+		void onActivityAddedI(ActivityVO act, String action);
 	}
 
 	public static void addOnActivityAddedIListener(OnActivityAddedI newListener) {
@@ -146,9 +182,9 @@ public class ActivityBO {
 		activityAddedListeners.remove(newListener);
 	}
 
-	private void notifyAllActivityAddedListeners(ActivityVO act,String action) {
+	private void notifyAllActivityAddedListeners(ActivityVO act, String action) {
 		for (OnActivityAddedI l : activityAddedListeners) {
-			l.onActivityAddedI(act,action);
+			l.onActivityAddedI(act, action);
 		}
 	}
 
