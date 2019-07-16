@@ -3,12 +3,19 @@ package com.cronoteSys.model.vo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -36,6 +43,8 @@ public class UserVO implements java.io.Serializable {
 	private String emailRecover;
 	private byte stats;
 	private String avatarPath;
+	
+	private List<TeamUser> teamUsers = new ArrayList<TeamUser>();
 
 	public UserVO() {
 	}
@@ -136,6 +145,20 @@ public class UserVO implements java.io.Serializable {
 	public void setAvatarPath(String avatarPath) {
 		this.avatarPath = avatarPath;
 	}
+	
+	@OneToMany(mappedBy = "primaryKey.member", 
+			cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	public List<TeamUser> getTeamUser() {
+		return teamUsers;
+	}
+
+	public void setTeamUser(List<TeamUser> teamUsers) {
+		this.teamUsers = teamUsers;
+	}
+	
+	public void addTeamUser(TeamUser teamUsers) {
+		this.teamUsers.add(teamUsers);
+	}	
 
 	@Override
 	public int hashCode() {

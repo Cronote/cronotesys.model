@@ -18,6 +18,7 @@
 		<mapping class="com.cronoteSys.model.vo.CategoryVO" />
 		<mapping class="com.cronoteSys.model.vo.ExecutionTimeVO" />
 		<mapping class="com.cronoteSys.model.vo.TeamVO" />
+		<mapping class="com.cronoteSys.model.vo.TeamUser" />
 		<!--<mapping class="com.cronoteSys.model.vo.relation.RelTeamUser" /> -->
 	</session-factory>
 </hibernate-configuration>
