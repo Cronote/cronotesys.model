@@ -3,12 +3,15 @@ package com.cronoteSys.model.vo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -136,6 +139,7 @@ public class UserVO implements java.io.Serializable {
 	public void setAvatarPath(String avatarPath) {
 		this.avatarPath = avatarPath;
 	}
+	
 
 	@Override
 	public int hashCode() {
@@ -194,5 +198,7 @@ public class UserVO implements java.io.Serializable {
 			return false;
 		return true;
 	}
+
+
 
 }

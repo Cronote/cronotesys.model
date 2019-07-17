@@ -1,17 +1,15 @@
 package com.cronoteSys.model.vo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -19,6 +17,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.cronoteSys.model.vo.view.SimpleUser;
+
 
 @Entity
 @Table(name = "tb_team")
@@ -35,6 +34,8 @@ public class TeamVO implements java.io.Serializable {
 	@Transient
 	private List<SimpleUser> membersSimpleUser;
 
+	private List<TeamUser> teamUsers = new ArrayList<TeamUser>();
+	
 	public TeamVO() {
 
 	}
@@ -96,14 +97,37 @@ public class TeamVO implements java.io.Serializable {
 		this.teamColor = teamColor;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "tbrel_team_user", joinColumns = @JoinColumn(referencedColumnName = "id", name = "id_team"), inverseJoinColumns = @JoinColumn(referencedColumnName = "id_user", name = "id_member"))
-	public List<UserVO> getMembers() {
-		return members;
+//	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//	@JoinTable(name = "tbrel_team_user", joinColumns = @JoinColumn(referencedColumnName = "id", name = "id_team"), inverseJoinColumns = @JoinColumn(referencedColumnName = "id_user", name = "id_member"))
+//	public List<UserVO> getMembers() {
+//		return members;
+//	}
+//
+//	public void setMembers(List<UserVO> members) {
+//		this.members = members;
+//	}
+	
+	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
+	public List<TeamUser> getTeamUsers() {
+		return teamUsers;
 	}
 
-	public void setMembers(List<UserVO> members) {
-		this.members = members;
+	public void setTeamUsers(List<TeamUser> teamUsers) {
+		this.teamUsers = teamUsers;
+	}
+	
+	public void addTeamUser(TeamUser teamUsers) {
+		this.teamUsers.add(teamUsers);
+	}
+
+	
+	@Transient
+	public List<SimpleUser> getMembersSimpleUser() {
+		return membersSimpleUser;
+	}
+
+	public void setMembersSimpleUser(List<SimpleUser> membersSimpleUser) {
+		this.membersSimpleUser = membersSimpleUser;
 	}
 
 	@Override
@@ -112,8 +136,12 @@ public class TeamVO implements java.io.Serializable {
 		int result = 1;
 		result = prime * result + ((desc == null) ? 0 : desc.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((members == null) ? 0 : members.hashCode());
+		result = prime * result + ((membersSimpleUser == null) ? 0 : membersSimpleUser.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((owner == null) ? 0 : owner.hashCode());
+		result = prime * result + ((teamColor == null) ? 0 : teamColor.hashCode());
+		result = prime * result + ((teamUsers == null) ? 0 : teamUsers.hashCode());
 		return result;
 	}
 
@@ -136,6 +164,16 @@ public class TeamVO implements java.io.Serializable {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
+		if (members == null) {
+			if (other.members != null)
+				return false;
+		} else if (!members.equals(other.members))
+			return false;
+		if (membersSimpleUser == null) {
+			if (other.membersSimpleUser != null)
+				return false;
+		} else if (!membersSimpleUser.equals(other.membersSimpleUser))
+			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -146,15 +184,18 @@ public class TeamVO implements java.io.Serializable {
 				return false;
 		} else if (!owner.equals(other.owner))
 			return false;
+		if (teamColor == null) {
+			if (other.teamColor != null)
+				return false;
+		} else if (!teamColor.equals(other.teamColor))
+			return false;
+		if (teamUsers == null) {
+			if (other.teamUsers != null)
+				return false;
+		} else if (!teamUsers.equals(other.teamUsers))
+			return false;
 		return true;
 	}
-	@Transient
-	public List<SimpleUser> getMembersSimpleUser() {
-		return membersSimpleUser;
-	}
 
-	public void setMembersSimpleUser(List<SimpleUser> membersSimpleUser) {
-		this.membersSimpleUser = membersSimpleUser;
-	}
-
+	
 }

@@ -62,19 +62,19 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 	}
 
 	private void fillMembers(TeamVO t) {
-		List<SimpleUser> sus = new ArrayList<SimpleUser>();
-		for (UserVO user : t.getMembers()) {
-			SimpleUser su = new SimpleUser();
-			su.setId(user.getIdUser());
-			su.setCompleteName(user.getCompleteName());
-			su.setEmail(new LoginDAO().getEmailFromUser(user.getIdUser()));
-			sus.add(su);
-		}
-		SimpleUser su = new SimpleUser();
-		su.setId(t.getOwner().getIdUser());
-		su.setCompleteName(t.getOwner().getCompleteName());
-		su.setEmail(new LoginDAO().getEmailFromUser(t.getOwner().getIdUser()));
-		sus.add(su);
-		t.setMembersSimpleUser(sus);
+//		List<SimpleUser> sus = new ArrayList<SimpleUser>();
+//		for (UserVO user : t.getMembers()) {
+//			SimpleUser su = new SimpleUser();
+//			su.setId(user.getIdUser());
+//			su.setCompleteName(user.getCompleteName());
+//			su.setEmail(new LoginDAO().getEmailFromUser(user.getIdUser()));
+//			sus.add(su);
+//		}
+//		SimpleUser su = new SimpleUser();
+//		su.setId(t.getOwner().getIdUser());
+//		su.setCompleteName(t.getOwner().getCompleteName());
+//		su.setEmail(new LoginDAO().getEmailFromUser(t.getOwner().getIdUser()));
+//		sus.add(su);
+//		t.setMembersSimpleUser(sus);
 	}
 }
