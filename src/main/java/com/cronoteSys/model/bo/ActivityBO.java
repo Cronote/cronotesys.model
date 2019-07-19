@@ -109,13 +109,11 @@ public class ActivityBO {
 
 	public ActivityVO updateRealTime(ActivityVO ac) {
 		Duration realTime = new ExecutionTimeBO().getRealTime(ac);
-		System.out.println(realTime);
 		ac.setRealtime(realTime);
 		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
 			ac = breakStatus(ac);
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveActivity", ac).readEntity(String.class);
-			System.out.println(json);
 			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
 		}
 		return acDAO.saveOrUpdate(ac);
@@ -134,25 +132,34 @@ public class ActivityBO {
 		return acDAO.getFiltredList(filter);
 	}
 
-	public Object[] timeToComplete(List<ActivityVO> lst, Duration limitDuration) {
+	public Object[] timeToComplete(List<ActivityVO> lstActivities, Duration limitDuration) {
 		Duration sum = Duration.ZERO;
 
-		List<ActivityVO> lstAux = new ArrayList<ActivityVO>();
+		List<ActivityVO> countedDependencies = new ArrayList<ActivityVO>();
 		boolean continueWhile = true;
 		boolean activitiesBlowLimitDuration = true;
 		while (continueWhile) {
-			for (ActivityVO act : lst) {
-//				System.out.println(act.getTitle());
-				act.getDependencies().removeAll(lstAux);
-				if (!lstAux.contains(act)) {
-					if (act.getDependencies().isEmpty()) {
+			for (ActivityVO act : lstActivities) {
+				/*
+				 * We need to copy the dependencies to a temp list because we clean the list to
+				 * know if we already counted all dependencies of a specific activity, and then
+				 * we count it
+				 */
+				List<ActivityVO> dependenciesCopy = new ArrayList<ActivityVO>();
+				for (ActivityVO a : act.getDependencies()) {
+					ActivityVO aCopy = new ActivityVO(a);
+					dependenciesCopy.add(aCopy);
+				}
+				dependenciesCopy.removeAll(countedDependencies);
+				if (!countedDependencies.contains(act)) {
+					if (dependenciesCopy.isEmpty()) {
 						if (sum.plus(act.getEstimatedTime()).compareTo(limitDuration.plusSeconds(1)) > -1) {
 							if (!activitiesBlowLimitDuration)
 								continueWhile = false;
 							activitiesBlowLimitDuration = false;
 						} else {
 							sum = sum.plus(act.getEstimatedTime());
-							lstAux.add(act);
+							countedDependencies.add(act);
 						}
 					} else {
 						continue;
@@ -160,11 +167,11 @@ public class ActivityBO {
 				}
 
 			}
-			if (lstAux.size() == lst.size()) {
+			if (countedDependencies.size() == lstActivities.size()) {
 				continueWhile = false;
 			}
 		}
-		Object[] ob = { sum, lstAux.size() };
+		Object[] ob = { sum, countedDependencies.size() };
 		return ob;
 
 	}
