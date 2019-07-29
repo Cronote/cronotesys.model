@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "tb_execution_time")
-@XmlRootElement
 public class ExecutionTimeVO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;

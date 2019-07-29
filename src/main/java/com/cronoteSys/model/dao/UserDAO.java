@@ -17,6 +17,7 @@ import org.hibernate.Session;
 import com.cronoteSys.filter.ActivityFilter;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.LoginVO;
+import com.cronoteSys.model.vo.TeamUser;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.model.vo.view.SimpleUser;
 
@@ -27,17 +28,20 @@ public class UserDAO extends GenericsDAO<UserVO, Integer> {
 	}
 
 	public List<UserVO> listAll() {
+		List<UserVO> users = new ArrayList<UserVO>();
 		try {
-			List<UserVO> Pessoas;
-			Pessoas = entityManager.createNativeQuery("SELECT * FROM tb_user", UserVO.class).getResultList();
-			if (Pessoas.size() > 0) {
-				return Pessoas;
+			users = entityManager.createNativeQuery("SELECT * FROM tb_user", UserVO.class).getResultList();
+			for (UserVO u : users) {
+				for (TeamUser t : u.getTeamUser()) {
+					t.setMember(null);
+					t.getTeam().getTeamUser().clear();
+				}
 			}
 
 		} catch (HibernateException e) {
 			System.out.println("Problem on list " + e.getMessage());
 		}
-		return null;
+		return users;
 	}
 
 	public List<SimpleUser> listLoggedUsers(String ids, String id) {

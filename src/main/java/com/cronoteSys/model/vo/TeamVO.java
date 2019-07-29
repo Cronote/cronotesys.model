@@ -1,5 +1,6 @@
 package com.cronoteSys.model.vo;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,10 +19,11 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.cronoteSys.model.vo.view.SimpleUser;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "tb_team")
-@XmlRootElement
 public class TeamVO implements java.io.Serializable {
 	private static final long serialVersionUID = -632847161659623870L;
 
@@ -30,10 +32,7 @@ public class TeamVO implements java.io.Serializable {
 	private String desc;
 	private UserVO owner;
 	private String teamColor;
-	@Transient
-	private List<SimpleUser> membersSimpleUser;
-
-	private Set<TeamUser> teamUsers = new HashSet<TeamUser>();
+	private transient List<TeamUser> teamUsers = new ArrayList<TeamUser>();
 
 	public TeamVO() {
 
@@ -96,11 +95,11 @@ public class TeamVO implements java.io.Serializable {
 	}
 
 	@OneToMany(mappedBy = "primaryKey.team", cascade = CascadeType.ALL)
-	public Set<TeamUser> getTeamUser() {
+	public List<TeamUser> getTeamUser() {
 		return teamUsers;
 	}
 
-	public void setTeamUser(Set<TeamUser> teamUsers) {
+	public void setTeamUser(List<TeamUser> teamUsers) {
 		this.teamUsers = teamUsers;
 		
 	}
@@ -152,13 +151,5 @@ public class TeamVO implements java.io.Serializable {
 		return true;
 	}
 
-	@Transient
-	public List<SimpleUser> getMembersSimpleUser() {
-		return membersSimpleUser;
-	}
-
-	public void setMembersSimpleUser(List<SimpleUser> membersSimpleUser) {
-		this.membersSimpleUser = membersSimpleUser;
-	}
 
 }

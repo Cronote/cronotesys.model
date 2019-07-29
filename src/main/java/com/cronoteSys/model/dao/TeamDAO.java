@@ -10,6 +10,7 @@ import javax.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 
 import com.cronoteSys.model.bo.LoginBO;
+import com.cronoteSys.model.vo.TeamUser;
 import com.cronoteSys.model.vo.TeamVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.model.vo.view.SimpleUser;
@@ -52,29 +53,17 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 							+ " where t.id_user =" + userId + " or tu.member in(" + userId + ")", TeamVO.class)
 					.getResultList();
 			for (TeamVO t : teams) {
-				//fillMembers(t);
+				System.out.println(t.getTeamUser().size());
+				for (TeamUser tu : t.getTeamUser()) {
+//					tu.getMember().getTeamUser().clear();
+//					tu.setTeam(new TeamVO());
+					
+				}
 			}
 
 		} catch (HibernateException e) {
 			System.out.println("Problem on list " + e.getMessage());
 		}
 		return teams;
-	}
-
-	private void fillMembers(TeamVO t) {
-		List<SimpleUser> sus = new ArrayList<SimpleUser>();
-//		for (UserVO user : t.getMembers()) {
-//			SimpleUser su = new SimpleUser();
-//			su.setId(user.getIdUser());
-//			su.setCompleteName(user.getCompleteName());
-//			su.setEmail(new LoginDAO().getEmailFromUser(user.getIdUser()));
-//			sus.add(su);
-//		}
-		SimpleUser su = new SimpleUser();
-		su.setId(t.getOwner().getIdUser());
-		su.setCompleteName(t.getOwner().getCompleteName());
-		su.setEmail(new LoginDAO().getEmailFromUser(t.getOwner().getIdUser()));
-		sus.add(su);
-		t.setMembersSimpleUser(sus);
 	}
 }

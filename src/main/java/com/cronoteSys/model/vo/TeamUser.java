@@ -20,12 +20,11 @@ import javax.persistence.Table;
 		joinColumns = @JoinColumn(name = "member", referencedColumnName = "id_user")),
 	@AssociationOverride(name = "primaryKey.team", 
 		joinColumns = @JoinColumn(name = "team",referencedColumnName = "id")) })
-@XmlRootElement
 public class TeamUser implements Serializable {
 	private static final long serialVersionUID = -2309919369757688500L;
 
 	// composite-id key
-	private TeamUserId primaryKey = new TeamUserId();
+	private transient TeamUserId primaryKey = new TeamUserId();
 
 	// additional fields
 	private boolean inviteAccepted;

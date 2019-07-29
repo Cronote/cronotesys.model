@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "tb_project")
-@XmlRootElement
 public class ProjectVO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -22,11 +21,8 @@ public class ProjectVO implements java.io.Serializable {
 	private Integer id;
 	private String title;
 	private String description;
-//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime lastModification;
-//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime startDate;
-//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime finishDate;
 	private Integer stats;
 	private UserVO userVO;
@@ -37,7 +33,7 @@ public class ProjectVO implements java.io.Serializable {
 	}
 
 	public ProjectVO(int idProject, String title, String description, LocalDateTime lastModification,
-			LocalDateTime startDate, LocalDateTime finishDate, int stats, UserVO userVO) {
+			LocalDateTime startDate, LocalDateTime finishDate, int stats, UserVO userVO, TeamVO team) {
 		this.id = idProject;
 		this.title = title;
 		this.description = description;
@@ -46,6 +42,7 @@ public class ProjectVO implements java.io.Serializable {
 		this.finishDate = finishDate;
 		this.stats = stats;
 		this.userVO = userVO;
+		this.team = team;
 	}
 
 	@Id

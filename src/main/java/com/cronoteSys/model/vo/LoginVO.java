@@ -22,7 +22,6 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 @Table(name = "tb_login")
-@XmlRootElement
 public class LoginVO implements java.io.Serializable {
 
 	/**

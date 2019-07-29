@@ -17,6 +17,7 @@ import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
@@ -70,6 +71,7 @@ public class ProjectBO {
 			String json = RestUtil.get("getListProjectByUser?userid=" + user.getIdUser()).readEntity(String.class);
 			Type projectListType = new TypeToken<List<ProjectVO>>() {
 			}.getType();
+			System.out.println(json);
 			List<ProjectVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, projectListType);
 			return lst;
 		} else {

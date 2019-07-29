@@ -12,8 +12,8 @@ public class TeamUserId implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1904666241413651799L;
-	private UserVO member;
-	private TeamVO team;
+	private  UserVO member;
+	private  TeamVO team;
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	public UserVO getMember() {
@@ -62,6 +62,11 @@ public class TeamUserId implements java.io.Serializable {
 		} else if (!team.equals(other.team))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "TeamUserId [member=" + member.getIdUser() + ", team=" + team.getId() + "]";
 	}
 
 
