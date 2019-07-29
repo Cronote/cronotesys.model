@@ -20,7 +20,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "tb_activity")
-@XmlRootElement
 public class ActivityVO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -28,13 +27,10 @@ public class ActivityVO implements java.io.Serializable {
 	public Integer id;
 	private String title;
 	private String description;
-//	@JsonDeserialize(using = DurationDeserializer.class)
 	private Duration estimatedTime;
 	private StatusEnum stats;
-//	@JsonDeserialize(using = DurationDeserializer.class)
 	private Duration realtime;
 	private Integer priority;
-//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime lastModification;
 	private UserVO userVO;
 	private ProjectVO projectVO;

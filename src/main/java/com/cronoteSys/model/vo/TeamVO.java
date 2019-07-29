@@ -1,17 +1,17 @@
 package com.cronoteSys.model.vo;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -19,10 +19,11 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.cronoteSys.model.vo.view.SimpleUser;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "tb_team")
-@XmlRootElement
 public class TeamVO implements java.io.Serializable {
 	private static final long serialVersionUID = -632847161659623870L;
 
@@ -31,22 +32,19 @@ public class TeamVO implements java.io.Serializable {
 	private String desc;
 	private UserVO owner;
 	private String teamColor;
-	private List<UserVO> members;
-	@Transient
-	private List<SimpleUser> membersSimpleUser;
+	private transient List<TeamUser> teamUsers = new ArrayList<TeamUser>();
 
 	public TeamVO() {
 
 	}
 
-	public TeamVO(Long id, String name, String desc, UserVO owner, String teamColor, List<UserVO> members) {
+	public TeamVO(Long id, String name, String desc, UserVO owner, String teamColor) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.desc = desc;
 		this.owner = owner;
 		this.teamColor = teamColor;
-		this.members = members;
 	}
 
 	@Id
@@ -96,14 +94,18 @@ public class TeamVO implements java.io.Serializable {
 		this.teamColor = teamColor;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "tbrel_team_user", joinColumns = @JoinColumn(referencedColumnName = "id", name = "id_team"), inverseJoinColumns = @JoinColumn(referencedColumnName = "id_user", name = "id_member"))
-	public List<UserVO> getMembers() {
-		return members;
+	@OneToMany(mappedBy = "primaryKey.team", cascade = CascadeType.ALL)
+	public List<TeamUser> getTeamUser() {
+		return teamUsers;
 	}
 
-	public void setMembers(List<UserVO> members) {
-		this.members = members;
+	public void setTeamUser(List<TeamUser> teamUsers) {
+		this.teamUsers = teamUsers;
+		
+	}
+
+	public void addTeamUser(TeamUser teamUsers) {
+		this.teamUsers.add(teamUsers);
 	}
 
 	@Override
@@ -148,13 +150,6 @@ public class TeamVO implements java.io.Serializable {
 			return false;
 		return true;
 	}
-	@Transient
-	public List<SimpleUser> getMembersSimpleUser() {
-		return membersSimpleUser;
-	}
 
-	public void setMembersSimpleUser(List<SimpleUser> membersSimpleUser) {
-		this.membersSimpleUser = membersSimpleUser;
-	}
 
 }

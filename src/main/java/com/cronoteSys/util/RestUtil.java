@@ -1,5 +1,11 @@
 package com.cronoteSys.util;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -12,17 +18,25 @@ public class RestUtil {
 //	public static String host = "https://cronote-api.herokuapp.com/myresource/";
 
 	public static boolean isConnectedToTheServer() {
+		boolean connectionOK = false;
+		HttpURLConnection connection = null;
 		try {
-			String response = get("connection").readEntity(String.class);
-			if (response.contains("SUCCESS")) {
-//				System.out.println("Online");
-				return true;
-
-			}
-		} catch (Exception e) {
+			URL u = new URL(host);
+			connection = (HttpURLConnection) u.openConnection();
+			connection.setRequestMethod("HEAD");
+			int code = connection.getResponseCode();
+			connectionOK = code == 200;
+			// You can determine on HTTP return code received. 200 is success.
+		} catch (MalformedURLException e) {
 			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
 		}
-		return false;
+		return connectionOK;
 	}
 
 	public static Response get(String link) {
@@ -49,6 +63,7 @@ public class RestUtil {
 		WebTarget target = client.target(host + link + "?id=" + id);
 		return target.request().delete();
 	}
+
 	public static Object delete(String link, long id) {
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(host + link + "?id=" + id);
