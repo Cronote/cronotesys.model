@@ -15,8 +15,8 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 	}
 
 	public String getEmailFromUser(Integer userId) {
-		return entityManager.createQuery("Select l.email from LoginVO l where l.tbUser.id=" + userId)
-				.getResultList().get(0).toString();
+		return entityManager.createQuery("Select l.email from LoginVO l where l.tbUser.id=" + userId).getResultList()
+				.get(0).toString();
 	}
 
 	public int changePassword(String email, String password) {
@@ -45,14 +45,12 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 
 	public UserVO verifiedUser(String email, String pass) {
 		try {
-			List<LoginVO> login = entityManager
-					.createNativeQuery("SELECT * FROM tb_login WHERE email  = '" + email + "';", LoginVO.class)
-					.getResultList();
-			if (login.size() > 0) {
-				if (login.get(0).getPasswd().equals(pass)) {
-					UserVO user = login.get(0).getTbUser();
-					Hibernate.initialize(user);
-					return user;
+			List<UserVO> user = entityManager.createQuery("from UserVO u where login.email = :email", UserVO.class)
+					.setParameter("email", email).getResultList();
+			if (user.size() > 0) {
+				if (user.get(0).getLogin().getPasswd().equals(pass)) {
+
+					return user.get(0);
 				}
 			}
 

@@ -13,6 +13,7 @@ import java.util.List;
 import com.cronoteSys.model.bo.ActivityBO.OnActivityAddedI;
 import com.cronoteSys.model.bo.ActivityBO.OnActivityDeletedI;
 import com.cronoteSys.model.dao.GenericsDAO;
+import com.cronoteSys.model.dao.ProjectDAO;
 import com.cronoteSys.model.dao.TeamDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.TeamVO;
@@ -88,6 +89,14 @@ public class TeamBO {
 			return lst;
 		}
 		return new TeamDAO().listByUserOwnerOrMember(userId);
+	}
+
+	public long countProjects(TeamVO t) {
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("countProjectByTeam?teamId=" + t.getId()).readEntity(String.class);
+			return Long.valueOf(json);
+		}
+		return new ProjectDAO().countByTeam(t.getId());
 	}
 
 	private static ArrayList<OnTeamAddedI> teamAddedListeners = new ArrayList<OnTeamAddedI>();

@@ -49,15 +49,16 @@ public class UserBO {
 		return userDao.listAll();
 	}
 
-	public List<SimpleUser> findByNameOrEmail(String search, String loggedUserId) {
+	public List<UserVO> findByNameOrEmail(String search, String loggedUserId) {
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.get("listByNameOrEmail?search=" + search.toLowerCase() + "&not=" + loggedUserId)
 					.readEntity(String.class);
-			Type simpleUserListType = new TypeToken<List<SimpleUser>>() {
+			Type simpleUserListType = new TypeToken<List<UserVO>>() {
 			}.getType();
-			List<SimpleUser> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, simpleUserListType);
+			List<UserVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, simpleUserListType);
 			return lst;
 		}
 		return userDao.findByNameOrEmail(search.toLowerCase(), loggedUserId);
 	}
+
 }

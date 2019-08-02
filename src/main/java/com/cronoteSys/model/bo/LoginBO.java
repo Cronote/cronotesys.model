@@ -53,6 +53,7 @@ public class LoginBO {
 		} else {
 			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
 		}
+
 		return (user != null && user.getStats() == 1) ? user : null;
 	}
 
@@ -65,6 +66,7 @@ public class LoginBO {
 		return new LoginDAO().loginExists(sEmail);
 	}
 
+	//XXX: not working
 	public LoginVO getLogin(UserVO user) {
 		return new LoginDAO().loginByUser(user);
 	}

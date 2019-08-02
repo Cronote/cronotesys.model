@@ -13,6 +13,7 @@ import com.cronoteSys.model.bo.LoginBO;
 import com.cronoteSys.model.vo.TeamUser;
 import com.cronoteSys.model.vo.TeamVO;
 import com.cronoteSys.model.vo.UserVO;
+import com.cronoteSys.model.vo.relation.side.TeamMember;
 import com.cronoteSys.model.vo.view.SimpleUser;
 
 public class TeamDAO extends GenericsDAO<TeamVO, Long> {
@@ -22,9 +23,13 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 	}
 
 	public TeamVO saveOrUpdate(TeamVO team) {
-		team = super.saveOrUpdate(team);
+		TeamVO savedTeam = super.saveOrUpdate(team);
+		savedTeam.setMembers(team.getMembers());
+		savedTeam.switchMembersBetweenLists(true);
+		System.out.println("size " + savedTeam.getTeamUser().size());
+		savedTeam = super.saveOrUpdate(savedTeam);
 //		fillMembers(team);
-		return team;
+		return savedTeam;
 
 	}
 
@@ -47,19 +52,9 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 		List<TeamVO> teams = new ArrayList<TeamVO>();
 		try {
 
-			teams = entityManager
-					.createNativeQuery("Select distinct t.id,t.name,t.description,t.id_user,t.teamColor"
-							+ " from tb_team t" + " left join teamuser tu on t.id = tu.team "
-							+ " where t.id_user =" + userId + " or tu.member in(" + userId + ")", TeamVO.class)
-					.getResultList();
-			for (TeamVO t : teams) {
-				System.out.println(t.getTeamUser().size());
-				for (TeamUser tu : t.getTeamUser()) {
-//					tu.getMember().getTeamUser().clear();
-//					tu.setTeam(new TeamVO());
-					
-				}
-			}
+			teams = entityManager.createNativeQuery("Select distinct t.id,t.name,t.description,t.id_user,t.teamColor"
+					+ " from tb_team t" + " left join teamuser tu on t.id = tu.team " + " where t.id_user =" + userId
+					+ " or tu.member in(" + userId + ")", TeamVO.class).getResultList();
 
 		} catch (HibernateException e) {
 			System.out.println("Problem on list " + e.getMessage());

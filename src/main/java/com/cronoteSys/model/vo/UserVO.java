@@ -15,10 +15,16 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+import com.cronoteSys.model.interfaces.ThreatingUser;
 import com.cronoteSys.model.vo.view.SimpleUser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @Entity
 @Table(name = "tb_user")
-public class UserVO implements java.io.Serializable {
+public class UserVO implements java.io.Serializable,ThreatingUser {
 
 	/**
 	 *
@@ -41,6 +47,7 @@ public class UserVO implements java.io.Serializable {
 	private String emailRecover;
 	private byte stats;
 	private String avatarPath;
+	private LoginVO login;
 	private transient List<TeamUser> teamUsers = new ArrayList<TeamUser>();
 
 	public UserVO() {
@@ -142,7 +149,17 @@ public class UserVO implements java.io.Serializable {
 	public void setAvatarPath(String avatarPath) {
 		this.avatarPath = avatarPath;
 	}
-	
+	@OneToOne(optional = false, cascade = CascadeType.ALL,orphanRemoval = true)
+	@JoinColumn(name = "id_login", referencedColumnName = "id_login")
+	@Fetch(FetchMode.SELECT)
+	public LoginVO getLogin() {
+		return login;
+	}
+
+	public void setLogin(LoginVO login) {
+		this.login = login;
+	}
+
 	@OneToMany(mappedBy = "primaryKey.member", 
 			cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	public List<TeamUser> getTeamUser() {

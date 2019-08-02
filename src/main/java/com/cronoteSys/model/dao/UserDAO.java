@@ -55,12 +55,13 @@ public class UserDAO extends GenericsDAO<UserVO, Integer> {
 		return users;
 	}
 
-	public List<SimpleUser> findByNameOrEmail(String search, String loggedUserId) {
-		String query = "select new com.cronoteSys.model.vo.view.SimpleUser" + "(u.idUser, u.completeName, l.email)"
-				+ " from LoginVO l" + " left join UserVO u on u.idUser=l.tbUser" + " where (lower(l.email) like '"
-				+ search + "%' or lower(u.completeName) like '" + search + "%') and u.idUser not in(" + loggedUserId
-				+ ")";
-
-		return entityManager.createQuery(query, SimpleUser.class).getResultList();
+	public List<UserVO> findByNameOrEmail(String search, String loggedUserId) {
+		String query = "from UserVO u where (lower(u.completeName) like :search1 "
+				+ " or lower(u.login.email) like :search2) and u.idUser not in(" + loggedUserId + ")";
+		List<UserVO> lst = entityManager.createQuery(query, UserVO.class)
+				.setParameter("search1", "%" + search + "%").setParameter("search2", "%" + search + "%")
+				.getResultList();
+		System.out.println(lst.size());
+		return lst;
 	}
 }

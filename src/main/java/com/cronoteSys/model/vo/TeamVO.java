@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,6 +19,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.cronoteSys.model.vo.relation.side.TeamMember;
 import com.cronoteSys.model.vo.view.SimpleUser;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,6 +35,8 @@ public class TeamVO implements java.io.Serializable {
 	private UserVO owner;
 	private String teamColor;
 	private transient List<TeamUser> teamUsers = new ArrayList<TeamUser>();
+
+	private List<TeamMember> members = new ArrayList<TeamMember>();
 
 	public TeamVO() {
 
@@ -94,18 +98,54 @@ public class TeamVO implements java.io.Serializable {
 		this.teamColor = teamColor;
 	}
 
-	@OneToMany(mappedBy = "primaryKey.team", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "primaryKey.team", cascade = CascadeType.ALL, orphanRemoval = true)
 	public List<TeamUser> getTeamUser() {
 		return teamUsers;
 	}
 
 	public void setTeamUser(List<TeamUser> teamUsers) {
 		this.teamUsers = teamUsers;
-		
+		for (TeamUser tu : teamUsers) {
+			getMembers().removeIf(new Predicate<TeamMember>() {
+
+				@Override
+				public boolean test(TeamMember t) {
+					return t.getUser().getIdUser().equals(tu.getMember().getIdUser());
+				}
+			});
+			getMembers().add(new TeamMember(tu.getMember(), tu.isInviteAccepted()));
+		}
+
 	}
 
 	public void addTeamUser(TeamUser teamUsers) {
 		this.teamUsers.add(teamUsers);
+	}
+
+	@Transient
+	public List<TeamMember> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<TeamMember> members) {
+		this.members = members;
+
+	}
+
+	public void switchMembersBetweenLists(boolean toSave) {
+		if (toSave) {
+			getTeamUser().clear();
+			for (TeamMember member : getMembers()) {
+				TeamUser tu = new TeamUser(this, member.getUser(), member.isInviteAccepted());
+				System.out.println(tu.getTeam());
+				addTeamUser(tu);
+			}
+		} else {
+			getMembers().clear();
+			for (TeamUser tu : getTeamUser()) {
+				getMembers().add(new TeamMember(tu.getMember(), tu.isInviteAccepted()));
+			}
+		}
 	}
 
 	@Override
@@ -150,6 +190,5 @@ public class TeamVO implements java.io.Serializable {
 			return false;
 		return true;
 	}
-
 
 }

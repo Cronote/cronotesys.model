@@ -29,15 +29,13 @@ public class LoginVO implements java.io.Serializable {
 	*/
 	private static final long serialVersionUID = 1L;
 	private Integer idLogin;
-	private UserVO tbUser;
 	private String email;
 	private String passwd;
 
 	public LoginVO() {
 	}
 
-	public LoginVO(UserVO tbUser, String email, String passwd) {
-		this.tbUser = tbUser;
+	public LoginVO( String email, String passwd) {
 		this.email = email;
 		this.passwd = passwd;
 	}
@@ -53,16 +51,7 @@ public class LoginVO implements java.io.Serializable {
 		this.idLogin = idLogin;
 	}
 
-	@OneToOne(optional = false, cascade = CascadeType.ALL,orphanRemoval = true)
-	@JoinColumn(name = "id_user", referencedColumnName = "id_user")
-	@Fetch(FetchMode.SELECT)
-	public UserVO getTbUser() {
-		return this.tbUser;
-	}
 
-	public void setTbUser(UserVO tbUser) {
-		this.tbUser = tbUser;
-	}
 
 	@Column(name = "email", nullable = false, unique = true)
 	public String getEmail() {

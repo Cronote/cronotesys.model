@@ -12,14 +12,11 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
-
 @Entity
 @Table(name = "teamUser")
 @AssociationOverrides({
-	@AssociationOverride(name = "primaryKey.member", 
-		joinColumns = @JoinColumn(name = "member", referencedColumnName = "id_user")),
-	@AssociationOverride(name = "primaryKey.team", 
-		joinColumns = @JoinColumn(name = "team",referencedColumnName = "id")) })
+		@AssociationOverride(name = "primaryKey.member", joinColumns = @JoinColumn(name = "member", referencedColumnName = "id_user")),
+		@AssociationOverride(name = "primaryKey.team", joinColumns = @JoinColumn(name = "team", referencedColumnName = "id")) })
 public class TeamUser implements Serializable {
 	private static final long serialVersionUID = -2309919369757688500L;
 
@@ -28,6 +25,16 @@ public class TeamUser implements Serializable {
 
 	// additional fields
 	private boolean inviteAccepted;
+
+	public TeamUser() {
+
+	}
+
+	public TeamUser(TeamVO team, UserVO member, boolean inviteAccepted) {
+		this.primaryKey.setMember(member);
+		this.primaryKey.setTeam(team);
+		this.inviteAccepted = inviteAccepted;
+	}
 
 	@EmbeddedId
 	public TeamUserId getPrimaryKey() {
@@ -55,7 +62,6 @@ public class TeamUser implements Serializable {
 	public void setTeam(TeamVO group) {
 		getPrimaryKey().setTeam(group);
 	}
-
 
 	public boolean isInviteAccepted() {
 		return inviteAccepted;
@@ -93,6 +99,4 @@ public class TeamUser implements Serializable {
 		return true;
 	}
 
-	
-	
 }
