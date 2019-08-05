@@ -7,6 +7,7 @@ package com.cronoteSys.model.bo;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -59,6 +60,19 @@ public class UserBO {
 			return lst;
 		}
 		return userDao.findByNameOrEmail(search.toLowerCase(), loggedUserId);
+	}
+
+	public List<UserVO> listLoggedUsers(String idsIn, String idsOut) {
+		List<UserVO> users = new ArrayList<UserVO>();
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("listLoggedUsers?idsIn=" + idsIn + "&not=" + idsOut).readEntity(String.class);
+			System.out.println(json);
+			Type simpleUserListType = new TypeToken<List<UserVO>>() {
+			}.getType();
+			users = GsonUtil.getGsonWithJavaTime().fromJson(json, simpleUserListType);
+			return users;
+		}
+		return userDao.listLoggedUsers(idsIn, idsOut);
 	}
 
 }

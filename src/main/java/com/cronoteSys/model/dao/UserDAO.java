@@ -44,24 +44,26 @@ public class UserDAO extends GenericsDAO<UserVO, Integer> {
 		return users;
 	}
 
-	public List<SimpleUser> listLoggedUsers(String ids, String id) {
-//		Session session = entityManager.unwrap(Session.class);
-		String where = ids != null ? ("where u.idUser in(" + ids + ") and u.idUser not in(" + id + ")") : "";
-		String query = "select new com.cronoteSys.model.vo.view.SimpleUser" + "(u.idUser, u.completeName, l.email) "
-				+ " from LoginVO l" + " left join UserVO u on u.idUser=l.tbUser " + where;
-		List<SimpleUser> users;
-		users = entityManager.createQuery(query, SimpleUser.class).getResultList();
+	public List<UserVO> listLoggedUsers(String ids, String id) {
 
+		List<UserVO> users = new ArrayList<UserVO>();
+
+		try {
+			String where = ids != null ? ("where u.idUser in(" + ids + ") and u.idUser not in(" + id + ")") : "";
+			String query = "select u from UserVO u " + where;
+			users = entityManager.createQuery(query, UserVO.class).getResultList();
+
+		} catch (HibernateException e) {
+			System.out.println("List logged users " + e.getMessage());
+		}
 		return users;
 	}
 
 	public List<UserVO> findByNameOrEmail(String search, String loggedUserId) {
 		String query = "from UserVO u where (lower(u.completeName) like :search1 "
 				+ " or lower(u.login.email) like :search2) and u.idUser not in(" + loggedUserId + ")";
-		List<UserVO> lst = entityManager.createQuery(query, UserVO.class)
-				.setParameter("search1", "%" + search + "%").setParameter("search2", "%" + search + "%")
-				.getResultList();
-		System.out.println(lst.size());
+		List<UserVO> lst = entityManager.createQuery(query, UserVO.class).setParameter("search1", "%" + search + "%")
+				.setParameter("search2", "%" + search + "%").getResultList();
 		return lst;
 	}
 }
