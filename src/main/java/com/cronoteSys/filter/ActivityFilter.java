@@ -18,6 +18,7 @@ public class ActivityFilter  {
 
 	private Integer project;
 	private Integer user;
+	private Integer activity;
 
 	public ActivityFilter() {
 		// TODO Auto-generated constructor stub
@@ -54,5 +55,13 @@ public class ActivityFilter  {
 
 	public void setUser(Integer user) {
 		this.user = user;
+	}
+
+	public Integer getActivity() {
+		return activity;
+	}
+
+	public void setActivity(Integer activity) {
+		this.activity = activity;
 	}
 }

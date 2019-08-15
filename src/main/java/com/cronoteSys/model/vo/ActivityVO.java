@@ -24,7 +24,7 @@ public class ActivityVO implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public Integer id;
+	private Integer id;
 	private String title;
 	private String description;
 	private Duration estimatedTime;

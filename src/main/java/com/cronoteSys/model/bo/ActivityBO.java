@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import javax.persistence.Transient;
 
@@ -130,6 +131,50 @@ public class ActivityBO {
 			return lst;
 		}
 		return acDAO.getFiltredList(filter);
+	}
+
+	public List<ActivityVO> listAllToBeDependency(ActivityFilter filter) {
+		List<ActivityVO> lst = new ArrayList<ActivityVO>();
+		if (RestUtil.isConnectedToTheServer()) {
+			String filterJsonEncoded = URLEncoder.encode(new Gson().toJson(filter));
+			String json = RestUtil.get("getActivityList?filter=" + filterJsonEncoded).readEntity(String.class);
+			Type activityListType = new TypeToken<List<ActivityVO>>() {
+			}.getType();
+			lst = GsonUtil.getGsonWithJavaTime().fromJson(json, activityListType);
+		} else {
+			lst = acDAO.getFiltredList(filter);
+		}
+		//Remove done
+		lst.removeIf(new Predicate<ActivityVO>() {
+			@Override
+			public boolean test(ActivityVO t) {
+				return StatusEnum.itsFinalized(t.getStats());
+			}
+		});
+		//Remove activities that will cause a dependency cycle
+		if (filter.getActivity() != null) {
+			List<ActivityVO> lstToRemove = new ArrayList<ActivityVO>();
+			ActivityVO ac = null;
+			for (ActivityVO a : lst) {
+				if (a.getId() == filter.getActivity()) {
+					ac = a;
+				}
+			}
+			for (ActivityVO a : lst) {
+				if (a.getDependencies().contains(ac)) {
+					lstToRemove.add(a);
+					continue;
+				}
+				for (ActivityVO a2 : a.getDependencies()) {
+					if (a2.getDependencies().contains(ac)) {
+						lstToRemove.add(a);
+					}
+				}
+			}
+			lst.removeAll(lstToRemove);
+		}
+		
+		return lst;
 	}
 
 	public Object[] timeToComplete(List<ActivityVO> lstActivities, Duration limitDuration) {
