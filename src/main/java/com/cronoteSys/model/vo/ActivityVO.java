@@ -36,6 +36,9 @@ public class ActivityVO implements java.io.Serializable {
 	private ProjectVO projectVO;
 	private CategoryVO categoryVO;
 	private List<ActivityVO> dependencies;
+	
+	private transient boolean itsDependecy = false;
+	
 	/**
 	 * empty constructor
 	 * 
@@ -223,6 +226,15 @@ public class ActivityVO implements java.io.Serializable {
 			lst.add(new ActivityVO(simple));
 		}
 		this.dependencies = lst;
+	}
+	
+	@Transient
+	public boolean itsDependency() {
+		return itsDependecy;
+	}
+	
+	public void setItsDependency(boolean its) {
+		this.itsDependecy = its;
 	}
 	@Transient
 	public String getEstimatedTimeAsString() {
