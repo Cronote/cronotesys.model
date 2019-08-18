@@ -35,6 +35,10 @@ public class EmailVO implements Serializable {
 		this.subject = subject;
 	}
 	
+	public EmailVO() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public String[] getReceiver() {
 		return receiver;
 	}
