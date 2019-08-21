@@ -25,7 +25,7 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 	public TeamVO saveOrUpdate(TeamVO team) {
 		TeamVO savedTeam = super.saveOrUpdate(team);
 		savedTeam.setMembers(team.getMembers());
-		savedTeam.switchMembersBetweenLists(true);
+		savedTeam.switchMembersBetweenLists(true);		
 		System.out.println("size " + savedTeam.getTeamUser().size());
 		savedTeam = super.saveOrUpdate(savedTeam);
 //		fillMembers(team);

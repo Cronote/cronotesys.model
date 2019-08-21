@@ -16,6 +16,7 @@ import com.cronoteSys.model.dao.GenericsDAO;
 import com.cronoteSys.model.dao.ProjectDAO;
 import com.cronoteSys.model.dao.TeamDAO;
 import com.cronoteSys.model.vo.ActivityVO;
+import com.cronoteSys.model.vo.EmailVO;
 import com.cronoteSys.model.vo.TeamVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
@@ -31,6 +32,7 @@ public class TeamBO {
 	public void save(TeamVO team) {
 
 		if (RestUtil.isConnectedToTheServer()) {
+			sendEmail(team);
 			String json = RestUtil.post("saveTeam", team).readEntity(String.class);
 			team = (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
 		} else {
@@ -41,6 +43,7 @@ public class TeamBO {
 
 	public void update(TeamVO team) {
 		if (RestUtil.isConnectedToTheServer()) {
+			sendEmail(team);
 			String json = RestUtil.post("saveTeam", team).readEntity(String.class);
 			team = (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
 		} else {
@@ -98,6 +101,23 @@ public class TeamBO {
 		}
 		return new ProjectDAO().countByTeam(t.getId());
 	}
+	
+	private void sendEmail(TeamVO team) {
+		String[] receivers = new String[team.getMembers().size()];
+		if(!team.getMembers().isEmpty()) {
+			for (int i = 0; i < team.getMembers().size(); i++) {
+				if(!team.getMembers().get(i).isInviteAccepted()) {
+					receivers[i] = team.getMembers().get(i).getUser().getLogin().getEmail()+";"+team.getMembers().get(i).getUser().getIdUser()+";"+team.getId();
+				}
+			}
+		}
+		EmailVO emailVO = new EmailVO();
+		emailVO.setReceiver(receivers);
+		emailVO.setMessage("team"+";teamid="+team.getId());
+		emailVO.setSubject("Convite para time");
+		String emailEncoder = URLEncoder.encode(new Gson().toJson(emailVO));
+		String rest = RestUtil.get("send_email?receivers="+emailEncoder).readEntity(String.class);
+	}
 
 	private static ArrayList<OnTeamAddedI> teamAddedListeners = new ArrayList<OnTeamAddedI>();
 
@@ -138,5 +158,7 @@ public class TeamBO {
 			l.onTeamDeleted(team);
 		}
 	}
+	
+	
 
 }

@@ -19,13 +19,12 @@ public class EmailBO {
 		String emailEncoder = URLEncoder.encode(new Gson().toJson(emailVO));
 		System.out.println("send_email?receivers="+emailEncoder);
 		String string =  RestUtil.get("send_email?receivers="+emailEncoder).readEntity(String.class);
-		System.out.println(string+"HE DO THE PONG DANCE");
 		if(string.contains("true")) {
 			return true;
 		}else {
 			return false;
 		}
-}
+	}
 	
 	
 	
