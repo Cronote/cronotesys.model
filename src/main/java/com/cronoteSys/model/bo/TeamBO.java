@@ -107,7 +107,7 @@ public class TeamBO {
 		if(!team.getMembers().isEmpty()) {
 			for (int i = 0; i < team.getMembers().size(); i++) {
 				if(!team.getMembers().get(i).isInviteAccepted()) {
-					receivers[i] = team.getMembers().get(i).getUser().getLogin().getEmail()+";"+team.getMembers().get(i).getUser().getIdUser()+";"+team.getId();
+					receivers[i] = team.getMembers().get(i).getUser().getLogin().getEmail()+";"+team.getMembers().get(i).getUser().getIdUser()+";"+team.getId()+";"+team.getName();
 				}
 			}
 		}
@@ -157,6 +157,10 @@ public class TeamBO {
 		for (OnTeamDeletedI l : teamDeletedListeners) {
 			l.onTeamDeleted(team);
 		}
+	}
+
+	public String getTeamName(int id) {
+		return new TeamDAO().getTeamName(id);
 	}
 	
 	

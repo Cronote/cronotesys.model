@@ -26,7 +26,6 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 		TeamVO savedTeam = super.saveOrUpdate(team);
 		savedTeam.setMembers(team.getMembers());
 		savedTeam.switchMembersBetweenLists(true);		
-		System.out.println("size " + savedTeam.getTeamUser().size());
 		savedTeam = super.saveOrUpdate(savedTeam);
 //		fillMembers(team);
 		return savedTeam;
@@ -60,5 +59,13 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 			System.out.println("Problem on list " + e.getMessage());
 		}
 		return teams;
+	}
+
+	public String getTeamName(int id) {
+		String team = entityManager.createNativeQuery("SELECT name	FROM public.tb_team WHERE id="+id+";").getResultList().get(0).toString();
+		if(team.isEmpty()) {
+			return null;
+		}
+		return team;
 	}
 }
