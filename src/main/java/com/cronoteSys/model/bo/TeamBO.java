@@ -32,23 +32,23 @@ public class TeamBO {
 	public void save(TeamVO team) {
 
 		if (RestUtil.isConnectedToTheServer()) {
-			sendEmail(team);
 			String json = RestUtil.post("saveTeam", team).readEntity(String.class);
 			team = (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
 		} else {
 			team = new TeamDAO().saveOrUpdate(team);
 		}
+		sendEmail(team);
 		notifyAllTeamAddedListeners(team, "added");
 	}
 
 	public void update(TeamVO team) {
 		if (RestUtil.isConnectedToTheServer()) {
-			sendEmail(team);
 			String json = RestUtil.post("saveTeam", team).readEntity(String.class);
 			team = (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
 		} else {
 			team = new TeamDAO().saveOrUpdate(team);
 		}
+		sendEmail(team);
 		notifyAllTeamAddedListeners(team, "updated");
 	}
 

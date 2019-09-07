@@ -148,6 +148,26 @@ public class TeamVO implements java.io.Serializable {
 		}
 	}
 
+	public static String getIdsAsStringFromList(List<TeamVO> lst) {
+		String returnStr = "";
+		if (lst.isEmpty()) {
+			return returnStr;
+		}
+		if (lst.size() == 1) {
+			returnStr = "(" + lst.get(0).getId() + ")";
+			return returnStr;
+		} else {
+			returnStr += "(" + lst.get(0).getId();
+			for (int i = 1; i < lst.size(); i++) {
+				returnStr += "," + lst.get(i).getId();
+			}
+			returnStr += ")";
+
+			System.out.println(returnStr);
+			return returnStr;
+		}
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

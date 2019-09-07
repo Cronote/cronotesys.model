@@ -34,8 +34,6 @@ public class ProjectBO {
 		objProject.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveProject", objProject).readEntity(String.class);
-			System.out.println("ProjectBO.save()");
-			System.out.println(json);
 			objProject = (ProjectVO) GsonUtil.fromJsonAsStringToObject(json, ProjectVO.class);
 		} else {
 			objProject = projectDAO.saveOrUpdate(objProject);
@@ -73,7 +71,6 @@ public class ProjectBO {
 			String json = RestUtil.get("getListProjectByUser?userid=" + user.getIdUser()).readEntity(String.class);
 			Type projectListType = new TypeToken<List<ProjectVO>>() {
 			}.getType();
-			System.out.println(json);
 			List<ProjectVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, projectListType);
 			return lst;
 		} else {

@@ -68,4 +68,21 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 		}
 		return team;
 	}
+	
+	public boolean inviteAccepted2(int member, int team) {
+		try {
+			TeamVO t = entityManager.createQuery("select t from TeamVO t where t.id ="+ team, TeamVO.class).getSingleResult();
+			for (TeamUser tu : t.getTeamUser()) {
+				if (tu.getMember().getIdUser() == member) {
+					tu.setInviteAccepted(true);
+				}
+			}
+			t = saveOrUpdate(t);
+			//			entityManager.createNativeQuery("UPDATE teamuser SET inviteaccepted=true WHERE member="+member+" AND team="+team+";").executeUpdate();
+			return true; 
+		}catch (HibernateException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }
