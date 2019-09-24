@@ -137,7 +137,6 @@ public class TeamVO implements java.io.Serializable {
 			getTeamUser().clear();
 			for (TeamMember member : getMembers()) {
 				TeamUser tu = new TeamUser(this, member.getUser(), member.isInviteAccepted());
-				System.out.println(tu.getTeam());
 				addTeamUser(tu);
 			}
 		} else {
@@ -162,8 +161,6 @@ public class TeamVO implements java.io.Serializable {
 				returnStr += "," + lst.get(i).getId();
 			}
 			returnStr += ")";
-
-			System.out.println(returnStr);
 			return returnStr;
 		}
 	}
