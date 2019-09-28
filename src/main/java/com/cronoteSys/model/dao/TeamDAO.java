@@ -1,7 +1,9 @@
 package com.cronoteSys.model.dao;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -25,9 +27,8 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 	public TeamVO saveOrUpdate(TeamVO team) {
 		TeamVO savedTeam = super.saveOrUpdate(team);
 		savedTeam.setMembers(team.getMembers());
-		savedTeam.switchMembersBetweenLists(true);		
+		savedTeam.switchMembersBetweenLists(true);
 		savedTeam = super.saveOrUpdate(savedTeam);
-//		fillMembers(team);
 		return savedTeam;
 
 	}
@@ -38,6 +39,16 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 			teams = entityManager.createQuery("Select t from TeamVO t", TeamVO.class).getResultList();
 
 			if (teams.size() > 0) {
+				for (TeamVO teamVO : teams) {
+					teamVO.getTeamUser().removeIf(new Predicate<TeamUser>() {
+
+						@Override
+						public boolean test(TeamUser t) {
+							// TODO Auto-generated method stub
+							return t.getExpiresAt() != null && t.getExpiresAt().isBefore(LocalDateTime.now());
+						}
+					});
+				}
 				return teams;
 			}
 
@@ -62,25 +73,42 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 	}
 
 	public String getTeamName(int id) {
-		String team = entityManager.createNativeQuery("SELECT name	FROM public.tb_team WHERE id="+id+";").getResultList().get(0).toString();
-		if(team.isEmpty()) {
+		String team = entityManager.createNativeQuery("SELECT name	FROM public.tb_team WHERE id=" + id + ";")
+				.getResultList().get(0).toString();
+		if (team.isEmpty()) {
 			return null;
 		}
 		return team;
 	}
-	
+
 	public boolean inviteAccepted2(int member, int team) {
 		try {
-			TeamVO t = entityManager.createQuery("select t from TeamVO t where t.id ="+ team, TeamVO.class).getSingleResult();
+			TeamVO t = entityManager.createQuery("select t from TeamVO t where t.id =" + team, TeamVO.class)
+					.getSingleResult();
+			TeamUser expiredInvite = null;
 			for (TeamUser tu : t.getTeamUser()) {
 				if (tu.getMember().getIdUser() == member) {
-					tu.setInviteAccepted(true);
+
+					// if expiracao é antes de agora entao expirou
+					if (tu.getExpiresAt() != null && tu.getExpiresAt().isBefore(LocalDateTime.now())) {
+						expiredInvite = tu;
+						break;
+					} else {
+						tu.setInviteAccepted(true);
+						tu.setExpiresAt(null);
+					}
 				}
 			}
+			// remove convite expirado (apenas se teve uma tentativa de aceitar)
+			if (expiredInvite != null) {
+				t.getTeamUser().remove(expiredInvite);
+				TeamMember expiredMember = new TeamMember(expiredInvite.getMember(), expiredInvite.isInviteAccepted(),
+						expiredInvite.getExpiresAt());
+				t.getMembers().remove(expiredMember);
+			}
 			t = saveOrUpdate(t);
-			//			entityManager.createNativeQuery("UPDATE teamuser SET inviteaccepted=true WHERE member="+member+" AND team="+team+";").executeUpdate();
-			return true; 
-		}catch (HibernateException e) {
+			return true && (expiredInvite == null);
+		} catch (HibernateException e) {
 			e.printStackTrace();
 		}
 		return false;

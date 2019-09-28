@@ -1,5 +1,6 @@
 package com.cronoteSys.model.vo;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -113,7 +114,7 @@ public class TeamVO implements java.io.Serializable {
 					return t.getUser().getIdUser().equals(tu.getMember().getIdUser());
 				}
 			});
-			getMembers().add(new TeamMember(tu.getMember(), tu.isInviteAccepted()));
+			getMembers().add(new TeamMember(tu.getMember(), tu.isInviteAccepted(), tu.getExpiresAt()));
 		}
 
 	}
@@ -128,6 +129,7 @@ public class TeamVO implements java.io.Serializable {
 	}
 
 	public void setMembers(List<TeamMember> members) {
+
 		this.members = members;
 
 	}
@@ -136,13 +138,13 @@ public class TeamVO implements java.io.Serializable {
 		if (toSave) {
 			getTeamUser().clear();
 			for (TeamMember member : getMembers()) {
-				TeamUser tu = new TeamUser(this, member.getUser(), member.isInviteAccepted());
+				TeamUser tu = new TeamUser(this, member.getUser(), member.isInviteAccepted(), member.getExpiresAt());
 				addTeamUser(tu);
 			}
 		} else {
 			getMembers().clear();
 			for (TeamUser tu : getTeamUser()) {
-				getMembers().add(new TeamMember(tu.getMember(), tu.isInviteAccepted()));
+				getMembers().add(new TeamMember(tu.getMember(), tu.isInviteAccepted(), tu.getExpiresAt()));
 			}
 		}
 	}

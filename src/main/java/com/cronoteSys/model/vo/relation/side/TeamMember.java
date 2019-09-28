@@ -1,6 +1,7 @@
 package com.cronoteSys.model.vo.relation.side;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.cronoteSys.model.interfaces.ThreatingUser;
@@ -12,15 +13,17 @@ public class TeamMember implements Serializable,ThreatingUser {
 
 	private UserVO user;
 	private boolean inviteAccepted;
+	private LocalDateTime expiresAt;
 
 	public TeamMember() {
 		super();
 	}
 
-	public TeamMember(UserVO user, boolean inviteAccepted) {
+	public TeamMember(UserVO user, boolean inviteAccepted,LocalDateTime expiresAt) {
 		super();
 		this.user = user;
 		this.inviteAccepted = inviteAccepted;
+		this.expiresAt = expiresAt;
 	}
 
 	public UserVO getUser() {
@@ -54,6 +57,14 @@ public class TeamMember implements Serializable,ThreatingUser {
 		}
 		TeamMember other = (TeamMember) obj;
 		return inviteAccepted == other.inviteAccepted && Objects.equals(user, other.user);
+	}
+
+	public LocalDateTime getExpiresAt() {
+		return expiresAt;
+	}
+
+	public void setExpiresAt(LocalDateTime expiresAt) {
+		this.expiresAt = expiresAt;
 	}
 
 }

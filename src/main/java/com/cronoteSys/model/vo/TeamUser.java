@@ -4,6 +4,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -25,15 +26,17 @@ public class TeamUser implements Serializable {
 
 	// additional fields
 	private boolean inviteAccepted;
+	private LocalDateTime expiresAt;
 
 	public TeamUser() {
 
 	}
 
-	public TeamUser(TeamVO team, UserVO member, boolean inviteAccepted) {
+	public TeamUser(TeamVO team, UserVO member, boolean inviteAccepted, LocalDateTime expiresAt) {
 		this.primaryKey.setMember(member);
 		this.primaryKey.setTeam(team);
 		this.inviteAccepted = inviteAccepted;
+		this.expiresAt = expiresAt;
 	}
 
 	@EmbeddedId
@@ -69,6 +72,14 @@ public class TeamUser implements Serializable {
 
 	public void setInviteAccepted(boolean inviteAccepted) {
 		this.inviteAccepted = inviteAccepted;
+	}
+
+	public LocalDateTime getExpiresAt() {
+		return expiresAt;
+	}
+
+	public void setExpiresAt(LocalDateTime expiresAt) {
+		this.expiresAt = expiresAt;
 	}
 
 	@Override
