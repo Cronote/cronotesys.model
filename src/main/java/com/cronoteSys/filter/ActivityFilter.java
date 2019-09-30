@@ -1,13 +1,9 @@
 package com.cronoteSys.filter;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import javax.ws.rs.WebApplicationException;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import com.cronoteSys.model.vo.ProjectVO;
-import com.cronoteSys.model.vo.UserVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**

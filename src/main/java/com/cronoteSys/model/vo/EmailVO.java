@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import javax.ws.rs.WebApplicationException;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import com.cronoteSys.filter.ActivityFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 

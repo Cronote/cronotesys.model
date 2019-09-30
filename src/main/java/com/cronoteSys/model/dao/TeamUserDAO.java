@@ -1,7 +1,6 @@
 package com.cronoteSys.model.dao;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.EntityTransaction;
 

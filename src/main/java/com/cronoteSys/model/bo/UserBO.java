@@ -8,13 +8,10 @@ package com.cronoteSys.model.bo;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.cronoteSys.model.dao.UserDAO;
-import com.cronoteSys.model.vo.TeamVO;
 import com.cronoteSys.model.vo.UserVO;
-import com.cronoteSys.model.vo.view.SimpleUser;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 import com.google.gson.reflect.TypeToken;
@@ -66,7 +63,6 @@ public class UserBO {
 		List<UserVO> users = new ArrayList<UserVO>();
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.get("listLoggedUsers?idsIn=" + idsIn + "&not=" + idsOut).readEntity(String.class);
-			System.out.println(json);
 			Type simpleUserListType = new TypeToken<List<UserVO>>() {
 			}.getType();
 			users = GsonUtil.getGsonWithJavaTime().fromJson(json, simpleUserListType);

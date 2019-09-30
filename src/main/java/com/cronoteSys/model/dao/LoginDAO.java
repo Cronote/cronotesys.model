@@ -2,7 +2,6 @@ package com.cronoteSys.model.dao;
 
 import java.util.List;
 
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 
 import com.cronoteSys.model.vo.LoginVO;

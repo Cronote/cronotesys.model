@@ -3,7 +3,6 @@ package com.cronoteSys.model.vo;
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
 import javax.persistence.ManyToOne;
-import javax.xml.bind.annotation.XmlRootElement;
 @Embeddable
 public class TeamUserId implements java.io.Serializable {
 

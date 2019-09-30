@@ -11,12 +11,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cronoteSys.model.bo.ActivityBO.OnActivityAddedI;
-import com.cronoteSys.model.bo.ActivityBO.OnActivityDeletedI;
-import com.cronoteSys.model.dao.GenericsDAO;
 import com.cronoteSys.model.dao.ProjectDAO;
 import com.cronoteSys.model.dao.TeamDAO;
-import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.EmailVO;
 import com.cronoteSys.model.vo.TeamUser;
 import com.cronoteSys.model.vo.TeamVO;

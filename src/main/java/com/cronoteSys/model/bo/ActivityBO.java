@@ -1,18 +1,12 @@
 package com.cronoteSys.model.bo;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
-import javax.persistence.Transient;
 
 import com.cronoteSys.filter.ActivityFilter;
 import com.cronoteSys.model.dao.ActivityDAO;
@@ -20,13 +14,7 @@ import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.StatusEnum;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 public class ActivityBO {

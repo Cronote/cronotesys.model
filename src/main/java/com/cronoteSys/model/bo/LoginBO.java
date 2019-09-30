@@ -7,10 +7,7 @@ package com.cronoteSys.model.bo;
 
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import com.cronoteSys.model.dao.LoginDAO;
-import com.cronoteSys.model.vo.ExecutionTimeVO;
 import com.cronoteSys.model.vo.LoginVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GenHash;
@@ -49,7 +46,6 @@ public class LoginBO {
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("login", login).readEntity(String.class);
 			user = (UserVO) GsonUtil.fromJsonAsStringToObject(json, UserVO.class);
-			System.out.println(json);
 		} else {
 			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
 		}
@@ -60,7 +56,6 @@ public class LoginBO {
 	public Long loginExists(String sEmail) {
 		if (RestUtil.isConnectedToTheServer()) {
 			String resp = RestUtil.get("email_exists?email=" + sEmail).readEntity(String.class);
-			System.out.println(resp);
 			return Long.valueOf(resp);
 		}
 		return new LoginDAO().loginExists(sEmail);

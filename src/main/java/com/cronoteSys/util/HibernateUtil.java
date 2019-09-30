@@ -5,16 +5,10 @@
  */
 package com.cronoteSys.util;
 
-import java.net.URI;
-
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistry;
 
 /**
  * Hibernate Utility class with a convenient method to get Session Factory
@@ -39,7 +33,7 @@ public class HibernateUtil {
 			System.err.println("Initial SessionFactory creation failed." + ex);
 			sessionFactory = new Configuration().configure("hibernate-local.cfg.xml").buildSessionFactory();
 			entityManager = sessionFactory.createEntityManager();
-		} 
+		}
 	}
 
 	public static EntityManager getEntityManager() {

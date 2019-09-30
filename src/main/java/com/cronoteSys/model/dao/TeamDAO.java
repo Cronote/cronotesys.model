@@ -5,18 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.HibernateException;
 
-import com.cronoteSys.model.bo.LoginBO;
 import com.cronoteSys.model.vo.TeamUser;
 import com.cronoteSys.model.vo.TeamVO;
-import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.model.vo.relation.side.TeamMember;
-import com.cronoteSys.model.vo.view.SimpleUser;
 
 public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 

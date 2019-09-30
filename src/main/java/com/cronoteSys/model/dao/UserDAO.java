@@ -3,23 +3,10 @@ package com.cronoteSys.model.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
 
-import com.cronoteSys.filter.ActivityFilter;
-import com.cronoteSys.model.vo.ActivityVO;
-import com.cronoteSys.model.vo.LoginVO;
 import com.cronoteSys.model.vo.TeamUser;
 import com.cronoteSys.model.vo.UserVO;
-import com.cronoteSys.model.vo.view.SimpleUser;
 
 public class UserDAO extends GenericsDAO<UserVO, Integer> {
 
