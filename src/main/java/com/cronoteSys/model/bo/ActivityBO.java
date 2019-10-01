@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -16,6 +17,7 @@ import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.sun.mail.imap.protocol.Status;
 
 public class ActivityBO {
 	ActivityDAO acDAO;
@@ -110,15 +112,89 @@ public class ActivityBO {
 	}
 
 	public List<ActivityVO> listAll(ActivityFilter filter) {
+		List<ActivityVO> lst = null;
 		if (RestUtil.isConnectedToTheServer()) {
 			String filterJsonEncoded = URLEncoder.encode(new Gson().toJson(filter));
 			String json = RestUtil.get("getActivityList?filter=" + filterJsonEncoded).readEntity(String.class);
 			Type activityListType = new TypeToken<List<ActivityVO>>() {
 			}.getType();
-			List<ActivityVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, activityListType);
-			return lst;
+			lst = GsonUtil.getGsonWithJavaTime().fromJson(json, activityListType);
+		} else {
+			lst = acDAO.getFiltredList(filter);
 		}
-		return acDAO.getFiltredList(filter);
+		lst = orderList(lst);
+		return lst;
+	}
+
+	private List<ActivityVO> orderList(List<ActivityVO> lst) {
+		// finalizados
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if (StatusEnum.itsFinalized(a2.getStats()) && !StatusEnum.itsFinalized(a1.getStats())) {
+					return 1;
+				} else if (StatusEnum.itsFinalized(a1.getStats()) && !StatusEnum.itsFinalized(a2.getStats())) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		// n iniciados
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if (a2.getStats() == StatusEnum.NOT_STARTED && a1.getStats() != StatusEnum.NOT_STARTED) {
+					return 1;
+				} else if (a1.getStats() == StatusEnum.NOT_STARTED && a2.getStats() != StatusEnum.NOT_STARTED) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		// pausado
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if (StatusEnum.itsPaused(a2.getStats()) && !StatusEnum.itsPaused(a1.getStats())) {
+					return 1;
+				} else if (StatusEnum.itsPaused(a1.getStats()) && !StatusEnum.itsPaused(a2.getStats())) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		// progresso
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if (StatusEnum.inProgress(a2.getStats()) && !StatusEnum.inProgress(a1.getStats())) {
+					return 1;
+				} else if (StatusEnum.inProgress(a1.getStats()) && !StatusEnum.inProgress(a2.getStats())) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		// Mais proximo de estourar
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if ((StatusEnum.inProgress(a2.getStats()) || StatusEnum.itsPaused(a2.getStats()))
+						&& (StatusEnum.inProgress(a1.getStats()) || StatusEnum.itsPaused(a1.getStats()))) {
+					Duration d1 = a1.getEstimatedTime().minus(a1.getRealtime());
+					Duration d2 = a2.getEstimatedTime().minus(a2.getRealtime());
+
+					return d1.compareTo(d2);
+				} else {
+					return 0;
+				}
+			}
+		});
+		return lst;
 	}
 
 	public List<ActivityVO> listAllToBeDependency(ActivityFilter filter) {
@@ -132,14 +208,14 @@ public class ActivityBO {
 		} else {
 			lst = acDAO.getFiltredList(filter);
 		}
-		//Remove done
+		// Remove done
 		lst.removeIf(new Predicate<ActivityVO>() {
 			@Override
 			public boolean test(ActivityVO t) {
 				return StatusEnum.itsFinalized(t.getStats());
 			}
 		});
-		//Remove activities that will cause a dependency cycle
+		// Remove activities that will cause a dependency cycle
 		if (filter.getActivity() != null) {
 			List<ActivityVO> lstToRemove = new ArrayList<ActivityVO>();
 			ActivityVO ac = null;
@@ -161,7 +237,7 @@ public class ActivityBO {
 			}
 			lst.removeAll(lstToRemove);
 		}
-		
+
 		return lst;
 	}
 
