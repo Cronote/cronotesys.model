@@ -23,8 +23,7 @@ public class RestUtil {
 			URL u = new URL(host);
 			connection = (HttpURLConnection) u.openConnection();
 			connection.setRequestMethod("HEAD");
-			int code = connection.getResponseCode();
-			connectionOK = code == 200;
+			connectionOK = connection.getResponseCode() == 200;
 			// You can determine on HTTP return code received. 200 is success.
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
