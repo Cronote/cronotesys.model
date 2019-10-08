@@ -32,6 +32,7 @@ public class ActivityVO implements java.io.Serializable {
 	private Integer priority;
 	private LocalDateTime lastModification;
 	private UserVO userVO;
+	private UserVO executor;
 	private ProjectVO projectVO;
 	private CategoryVO categoryVO;
 	private List<ActivityVO> dependencies;
@@ -188,7 +189,15 @@ public class ActivityVO implements java.io.Serializable {
 	public void setUserVO(UserVO userVO) {
 		this.userVO = userVO;
 	}
-
+	
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "id_executor", referencedColumnName = "id_user")
+	public UserVO getExecutor() {
+		return executor;
+	}
+	public void setExecutor(UserVO executor) {
+		this.executor = executor;
+	}
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "id_project", referencedColumnName = "id_project")
 	public ProjectVO getProjectVO() {

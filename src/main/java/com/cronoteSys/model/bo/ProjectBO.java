@@ -30,7 +30,7 @@ public class ProjectBO {
 			objProject = projectDAO.saveOrUpdate(objProject);
 
 		}
-		notifyAllProjectAddedListeners(objProject);
+		notifyAllProjectAddedListeners(objProject, "save");
 		return objProject;
 
 	}
@@ -39,9 +39,13 @@ public class ProjectBO {
 		objProject.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveProject", objProject).readEntity(String.class);
-			return (ProjectVO) GsonUtil.fromJsonAsStringToObject(json, ProjectVO.class);
+			objProject = (ProjectVO) GsonUtil.fromJsonAsStringToObject(json, ProjectVO.class);
+		} else {
+
+			objProject = projectDAO.saveOrUpdate(objProject);
 		}
-		return projectDAO.saveOrUpdate(objProject);
+		notifyAllProjectAddedListeners(objProject, "update");
+		return objProject;
 	}
 
 	public void delete(ProjectVO objProject) {
@@ -85,7 +89,7 @@ public class ProjectBO {
 	private static ArrayList<OnProjectAddedI> projectAddedListeners = new ArrayList<OnProjectAddedI>();
 
 	public interface OnProjectAddedI {
-		void onProjectAddedI(ProjectVO proj);
+		void onProjectAddedI(ProjectVO proj, String mode);
 	}
 
 	public static void addOnProjectAddedIListener(OnProjectAddedI newListener) {
@@ -96,9 +100,9 @@ public class ProjectBO {
 		projectAddedListeners.remove(newListener);
 	}
 
-	private void notifyAllProjectAddedListeners(ProjectVO act) {
+	private void notifyAllProjectAddedListeners(ProjectVO act, String mode) {
 		for (OnProjectAddedI l : projectAddedListeners) {
-			l.onProjectAddedI(act);
+			l.onProjectAddedI(act, mode);
 		}
 	}
 

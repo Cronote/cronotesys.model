@@ -106,4 +106,19 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 		}
 		return false;
 	}
+
+	public List<TeamVO> searchWithUserOwnerOrMember(String search, Integer idUser) {
+		List<TeamVO> teams = new ArrayList<TeamVO>();
+		try {
+
+			teams = entityManager.createNativeQuery("Select distinct t.id,t.name,t.description,t.id_user,t.teamColor"
+					+ " from tb_team t " + " left join teamuser tu on t.id = tu.team "
+					+ " where LOWER(t.name) like ? and ( t.id_user =" + idUser + " or tu.member in(" + idUser + "))",
+					TeamVO.class).setParameter(1, search.toLowerCase() + "%").getResultList();
+
+		} catch (HibernateException e) {
+			System.out.println("Problem on list " + e.getMessage());
+		}
+		return teams;
+	}
 }

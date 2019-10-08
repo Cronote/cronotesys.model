@@ -16,6 +16,7 @@ import com.cronoteSys.model.dao.TeamDAO;
 import com.cronoteSys.model.vo.EmailVO;
 import com.cronoteSys.model.vo.TeamUser;
 import com.cronoteSys.model.vo.TeamVO;
+import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.model.vo.relation.side.TeamMember;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
@@ -89,7 +90,7 @@ public class TeamBO {
 			Type teamListType = new TypeToken<List<TeamVO>>() {
 			}.getType();
 			List<TeamVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, teamListType);
-			
+
 			List<TeamMember> expiredMembers = new ArrayList<TeamMember>();
 			List<TeamUser> expiredUsers = new ArrayList<TeamUser>();
 			lst.forEach((t) -> {
@@ -187,6 +188,20 @@ public class TeamBO {
 
 	public String getTeamName(int id) {
 		return new TeamDAO().getTeamName(id);
+	}
+
+	public List<TeamVO> searchByUserOwnerOrMember(String search, UserVO loggedUser) {
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil
+					.get("getListTeamsBySearchWithUser?userId=" + loggedUser.getIdUser() + "&search=" + search)
+					.readEntity(String.class);
+			Type teamListType = new TypeToken<List<TeamVO>>() {
+			}.getType();
+			List<TeamVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, teamListType);
+
+			return lst;
+		}
+		return new TeamDAO().searchWithUserOwnerOrMember(search, loggedUser.getIdUser());
 	}
 
 }
