@@ -5,14 +5,16 @@
  */
 package com.cronoteSys.model.bo;
 
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.cronoteSys.model.dao.UserDAO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
+import com.google.gson.reflect.TypeToken;
 
 /**
  *
@@ -26,27 +28,15 @@ public class UserBO {
 	}
 
 	public UserVO save(UserVO user) {
-		if (user.getRegisterDate() == null) user.setRegisterDate(LocalDateTime.now());
-		if(RestUtil.isConnectedToTheServer()) {
+		if (user.getRegisterDate() == null)
+			user.setRegisterDate(LocalDateTime.now());
+		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveUser", user).readEntity(String.class);
 			user = (UserVO) GsonUtil.fromJsonAsStringToObject(json, UserVO.class);
 		}
 		user = userDao.saveOrUpdate(user);
 		return user;
 	}
-
-//	public void update(UserVO user) {
-//		userDao.saveOrUpdate(user);
-//	}
-
-//    public boolean activateOrInactivate(UserVO user) {
-//        if (user.getStats() == 1) { //ativado
-//            user.setStats(Byte.valueOf("0"));
-//        } else { // desativado
-//            user.setStats(Byte.valueOf("1"));
-//        }
-//        return new UserDAO().update(user);
-//    }
 
 	public void delete(UserVO user) {
 		userDao.delete(user.getIdUser());
@@ -56,4 +46,29 @@ public class UserBO {
 	public List<UserVO> listAll() {
 		return userDao.listAll();
 	}
+
+	public List<UserVO> findByNameOrEmail(String search, String loggedUserId) {
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("listByNameOrEmail?search=" + search.toLowerCase() + "&not=" + loggedUserId)
+					.readEntity(String.class);
+			Type simpleUserListType = new TypeToken<List<UserVO>>() {
+			}.getType();
+			List<UserVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, simpleUserListType);
+			return lst;
+		}
+		return userDao.findByNameOrEmail(search.toLowerCase(), loggedUserId);
+	}
+
+	public List<UserVO> listLoggedUsers(String idsIn, String idsOut) {
+		List<UserVO> users = new ArrayList<UserVO>();
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("listLoggedUsers?idsIn=" + idsIn + "&not=" + idsOut).readEntity(String.class);
+			Type simpleUserListType = new TypeToken<List<UserVO>>() {
+			}.getType();
+			users = GsonUtil.getGsonWithJavaTime().fromJson(json, simpleUserListType);
+			return users;
+		}
+		return userDao.listLoggedUsers(idsIn, idsOut);
+	}
+
 }

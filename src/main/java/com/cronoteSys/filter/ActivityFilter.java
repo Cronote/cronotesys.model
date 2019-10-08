@@ -1,13 +1,9 @@
 package com.cronoteSys.filter;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import javax.ws.rs.WebApplicationException;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import com.cronoteSys.model.vo.ProjectVO;
-import com.cronoteSys.model.vo.UserVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -18,6 +14,7 @@ public class ActivityFilter  {
 
 	private Integer project;
 	private Integer user;
+	private Integer activity;
 
 	public ActivityFilter() {
 		// TODO Auto-generated constructor stub
@@ -54,5 +51,13 @@ public class ActivityFilter  {
 
 	public void setUser(Integer user) {
 		this.user = user;
+	}
+
+	public Integer getActivity() {
+		return activity;
+	}
+
+	public void setActivity(Integer activity) {
+		this.activity = activity;
 	}
 }

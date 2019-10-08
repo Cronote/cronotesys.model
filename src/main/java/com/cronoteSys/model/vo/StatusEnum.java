@@ -2,7 +2,7 @@ package com.cronoteSys.model.vo;
 
 public enum StatusEnum {
 
-	NOT_STARTED("Não iniciado", "#D3D3D3"), NORMAL_IN_PROGRESS("Em progresso", "#1232C6"),
+	NOT_STARTED("NÃ£o inicializado", "#D3D3D3"), NORMAL_IN_PROGRESS("Em progresso", "#1232C6"),
 	NORMAL_PAUSED("Pausado", "#FFC61E"), NORMAL_FINALIZED("Finalizado", "#7ED957"),
 	BROKEN_IN_PROGRESS("Em progresso", "#FF5757"), BROKEN_PAUSED("Pausado", "#FF5757"),
 	BROKEN_FINALIZED("Finalizado", "#FF5757");

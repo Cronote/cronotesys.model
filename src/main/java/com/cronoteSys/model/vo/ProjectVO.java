@@ -1,6 +1,7 @@
 package com.cronoteSys.model.vo;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,33 +11,28 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "tb_project")
-@XmlRootElement
 public class ProjectVO implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1L;
-
+	private static final long serialVersionUID = -3856789567100198726L;
 	private Integer id;
 	private String title;
 	private String description;
-//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime lastModification;
-//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime startDate;
-//	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime finishDate;
 	private Integer stats;
 	private UserVO userVO;
+	private TeamVO team;
 
 	public ProjectVO() {
 
 	}
 
 	public ProjectVO(int idProject, String title, String description, LocalDateTime lastModification,
-			LocalDateTime startDate, LocalDateTime finishDate, int stats, UserVO userVO) {
+			LocalDateTime startDate, LocalDateTime finishDate, int stats, UserVO userVO, TeamVO team) {
 		this.id = idProject;
 		this.title = title;
 		this.description = description;
@@ -45,6 +41,7 @@ public class ProjectVO implements java.io.Serializable {
 		this.finishDate = finishDate;
 		this.stats = stats;
 		this.userVO = userVO;
+		this.team = team;
 	}
 
 	@Id
@@ -122,6 +119,16 @@ public class ProjectVO implements java.io.Serializable {
 		this.userVO = userVO;
 	}
 
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "id_team", referencedColumnName = "id")
+	public TeamVO getTeam() {
+		return team;
+	}
+
+	public void setTeam(TeamVO team) {
+		this.team = team;
+	}
+
 	@Override
 	public String toString() {
 		return "ProjectVO [id=" + id + ", title=" + title + ", description=" + description + ", lastModification="
@@ -131,69 +138,19 @@ public class ProjectVO implements java.io.Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + ((finishDate == null) ? 0 : finishDate.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((lastModification == null) ? 0 : lastModification.hashCode());
-		result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
-		result = prime * result + ((stats == null) ? 0 : stats.hashCode());
-		result = prime * result + ((title == null) ? 0 : title.hashCode());
-		result = prime * result + ((userVO == null) ? 0 : userVO.hashCode());
-		return result;
+		return Objects.hash(id);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (!(obj instanceof ProjectVO)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
 		ProjectVO other = (ProjectVO) obj;
-		if (description == null) {
-			if (other.description != null)
-				return false;
-		} else if (!description.equals(other.description))
-			return false;
-		if (finishDate == null) {
-			if (other.finishDate != null)
-				return false;
-		} else if (!finishDate.equals(other.finishDate))
-			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (lastModification == null) {
-			if (other.lastModification != null)
-				return false;
-		} else if (!lastModification.equals(other.lastModification))
-			return false;
-		if (startDate == null) {
-			if (other.startDate != null)
-				return false;
-		} else if (!startDate.equals(other.startDate))
-			return false;
-		if (stats == null) {
-			if (other.stats != null)
-				return false;
-		} else if (!stats.equals(other.stats))
-			return false;
-		if (title == null) {
-			if (other.title != null)
-				return false;
-		} else if (!title.equals(other.title))
-			return false;
-		if (userVO == null) {
-			if (other.userVO != null)
-				return false;
-		} else if (!userVO.equals(other.userVO))
-			return false;
-		return true;
+		return Objects.equals(id, other.id);
 	}
 
 }

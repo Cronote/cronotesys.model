@@ -1,8 +1,11 @@
 package com.cronoteSys.model.vo.view;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.hibernate.annotations.Immutable;
 
 @Immutable
+@XmlRootElement
 public class SimpleUser implements java.io.Serializable {
 	private static final long serialVersionUID = 7246780223621961050L;
 	private Integer idUser;

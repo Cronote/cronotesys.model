@@ -6,10 +6,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-
 import com.cronoteSys.model.dao.ExecutionTimeDAO;
 import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ExecutionTimeVO;
@@ -40,10 +36,7 @@ public class ExecutionTimeBO {
 			}
 			return execDAO.saveOrUpdate(exec);
 		} else {
-			System.out.println("Atividades simult‚neas n„o permitido");
 			return null;
-			// TODO: devolver mecanismos para avisar que o usuario n√£o pode executar
-			// atividades simult√¢neas
 		}
 	}
 
@@ -66,12 +59,11 @@ public class ExecutionTimeBO {
 	public Duration getRealTime(ActivityVO act) {
 		List<ExecutionTimeVO> lst = new ArrayList<ExecutionTimeVO>();
 		if (RestUtil.isConnectedToTheServer()) {
-			String json = RestUtil.get("listExecutionTimeByActivity?activityID=" + act.getId()).readEntity(String.class);
+			String json = RestUtil.get("listExecutionTimeByActivity?activityID=" + act.getId())
+					.readEntity(String.class);
 			Type executionTimeListType = new TypeToken<List<ExecutionTimeVO>>() {
 			}.getType();
-			System.out.println(json);
 			lst = GsonUtil.getGsonWithJavaTime().fromJson(json, executionTimeListType);
-			System.out.println(lst.size());
 		} else {
 			lst = execDAO.listByActivity(act.getId());
 		}
@@ -90,7 +82,6 @@ public class ExecutionTimeBO {
 		if (execInProgress != null) {
 			sum = sum.plus(Duration.between(execInProgress.getStartDate(), LocalDateTime.now()));
 		}
-		System.out.println(sum);
 		return sum;
 	}
 

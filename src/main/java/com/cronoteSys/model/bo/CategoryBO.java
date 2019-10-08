@@ -1,5 +1,6 @@
 package com.cronoteSys.model.bo;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.ws.rs.core.GenericType;
@@ -10,6 +11,7 @@ import com.cronoteSys.model.vo.CategoryVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
+import com.google.gson.reflect.TypeToken;
 
 public class CategoryBO {
 
@@ -55,8 +57,12 @@ public class CategoryBO {
 	}
 	public List<CategoryVO> listByUser(UserVO user) {
 		if (RestUtil.isConnectedToTheServer()) {
-			return RestUtil.get("listCategoryByUser?userID="+user.getIdUser()).readEntity(new GenericType<List<CategoryVO>>() {
-			});
+			String json = RestUtil.get("listCategoryByUser?userID="+user.getIdUser()).readEntity(String.class);
+			Type categoryListType = new TypeToken<List<CategoryVO>>() {
+			}.getType();
+			
+			return GsonUtil.getGsonWithJavaTime().fromJson(json, categoryListType);
+			
 		}
 		return new CategoryDAO().getList(user.getIdUser());
 	}

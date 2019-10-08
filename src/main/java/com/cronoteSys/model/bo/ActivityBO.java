@@ -1,15 +1,13 @@
 package com.cronoteSys.model.bo;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.cronoteSys.filter.ActivityFilter;
 import com.cronoteSys.model.dao.ActivityDAO;
@@ -17,14 +15,9 @@ import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.StatusEnum;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import com.sun.mail.imap.protocol.Status;
 
 public class ActivityBO {
 	ActivityDAO acDAO;
@@ -41,16 +34,23 @@ public class ActivityBO {
 		activityVO.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveActivity", activityVO).readEntity(String.class);
-			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+			activityVO = (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
 		} else {
 			activityVO = acDAO.saveOrUpdate(activityVO);
 		}
-		notifyAllActivityAddedListeners(activityVO);
+		notifyAllActivityAddedListeners(activityVO, "save");
 		return activityVO;
 	}
 
 	public ActivityVO update(ActivityVO activityVO) {
-		return acDAO.saveOrUpdate(activityVO);
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.post("saveActivity", activityVO).readEntity(String.class);
+			activityVO = (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+		} else {
+			activityVO = acDAO.saveOrUpdate(activityVO);
+		}
+		notifyAllActivityAddedListeners(activityVO, "update");
+		return activityVO;
 	}
 
 	public void delete(ActivityVO activityVO) {
@@ -100,13 +100,11 @@ public class ActivityBO {
 
 	public ActivityVO updateRealTime(ActivityVO ac) {
 		Duration realTime = new ExecutionTimeBO().getRealTime(ac);
-		System.out.println(realTime);
 		ac.setRealtime(realTime);
 		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
 			ac = breakStatus(ac);
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveActivity", ac).readEntity(String.class);
-			System.out.println(json);
 			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
 		}
 		return acDAO.saveOrUpdate(ac);
@@ -114,21 +112,183 @@ public class ActivityBO {
 	}
 
 	public List<ActivityVO> listAll(ActivityFilter filter) {
+		List<ActivityVO> lst = null;
 		if (RestUtil.isConnectedToTheServer()) {
 			String filterJsonEncoded = URLEncoder.encode(new Gson().toJson(filter));
 			String json = RestUtil.get("getActivityList?filter=" + filterJsonEncoded).readEntity(String.class);
 			Type activityListType = new TypeToken<List<ActivityVO>>() {
 			}.getType();
-			List<ActivityVO> lst = GsonUtil.getGsonWithJavaTime().fromJson(json, activityListType);
-			return lst;
+			lst = GsonUtil.getGsonWithJavaTime().fromJson(json, activityListType);
+		} else {
+			lst = acDAO.getFiltredList(filter);
 		}
-		return acDAO.getFiltredList(filter);
+		lst = orderList(lst);
+		return lst;
+	}
+
+	private List<ActivityVO> orderList(List<ActivityVO> lst) {
+		// finalizados
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if (StatusEnum.itsFinalized(a2.getStats()) && !StatusEnum.itsFinalized(a1.getStats())) {
+					return 1;
+				} else if (StatusEnum.itsFinalized(a1.getStats()) && !StatusEnum.itsFinalized(a2.getStats())) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		// n iniciados
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if (a2.getStats() == StatusEnum.NOT_STARTED && a1.getStats() != StatusEnum.NOT_STARTED) {
+					return 1;
+				} else if (a1.getStats() == StatusEnum.NOT_STARTED && a2.getStats() != StatusEnum.NOT_STARTED) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		// pausado
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if (StatusEnum.itsPaused(a2.getStats()) && !StatusEnum.itsPaused(a1.getStats())) {
+					return 1;
+				} else if (StatusEnum.itsPaused(a1.getStats()) && !StatusEnum.itsPaused(a2.getStats())) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		// progresso
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if (StatusEnum.inProgress(a2.getStats()) && !StatusEnum.inProgress(a1.getStats())) {
+					return 1;
+				} else if (StatusEnum.inProgress(a1.getStats()) && !StatusEnum.inProgress(a2.getStats())) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+		// Mais proximo de estourar
+		lst.sort(new Comparator<ActivityVO>() {
+			@Override
+			public int compare(ActivityVO a1, ActivityVO a2) {
+				if ((StatusEnum.inProgress(a2.getStats()) || StatusEnum.itsPaused(a2.getStats()))
+						&& (StatusEnum.inProgress(a1.getStats()) || StatusEnum.itsPaused(a1.getStats()))) {
+					Duration d1 = a1.getEstimatedTime().minus(a1.getRealtime());
+					Duration d2 = a2.getEstimatedTime().minus(a2.getRealtime());
+
+					return d1.compareTo(d2);
+				} else {
+					return 0;
+				}
+			}
+		});
+		return lst;
+	}
+
+	public List<ActivityVO> listAllToBeDependency(ActivityFilter filter) {
+		List<ActivityVO> lst = new ArrayList<ActivityVO>();
+		if (RestUtil.isConnectedToTheServer()) {
+			String filterJsonEncoded = URLEncoder.encode(new Gson().toJson(filter));
+			String json = RestUtil.get("getActivityList?filter=" + filterJsonEncoded).readEntity(String.class);
+			Type activityListType = new TypeToken<List<ActivityVO>>() {
+			}.getType();
+			lst = GsonUtil.getGsonWithJavaTime().fromJson(json, activityListType);
+		} else {
+			lst = acDAO.getFiltredList(filter);
+		}
+		// Remove done
+		lst.removeIf(new Predicate<ActivityVO>() {
+			@Override
+			public boolean test(ActivityVO t) {
+				return StatusEnum.itsFinalized(t.getStats());
+			}
+		});
+		// Remove activities that will cause a dependency cycle
+		if (filter.getActivity() != null) {
+			List<ActivityVO> lstToRemove = new ArrayList<ActivityVO>();
+			ActivityVO ac = null;
+			for (ActivityVO a : lst) {
+				if (a.getId() == filter.getActivity()) {
+					ac = a;
+				}
+			}
+			for (ActivityVO a : lst) {
+				if (a.getDependencies().contains(ac)) {
+					lstToRemove.add(a);
+					continue;
+				}
+				for (ActivityVO a2 : a.getDependencies()) {
+					if (a2.getDependencies().contains(ac)) {
+						lstToRemove.add(a);
+					}
+				}
+			}
+			lst.removeAll(lstToRemove);
+		}
+
+		return lst;
+	}
+
+	public Object[] timeToComplete(List<ActivityVO> lstActivities, Duration limitDuration) {
+		Duration sum = Duration.ZERO;
+
+		List<ActivityVO> countedDependencies = new ArrayList<ActivityVO>();
+		boolean continueWhile = true;
+		boolean activitiesBlowLimitDuration = true;
+		while (continueWhile) {
+			for (ActivityVO act : lstActivities) {
+				/*
+				 * We need to copy the dependencies to a temp list because we clean the list to
+				 * know if we already counted all dependencies of a specific activity, and then
+				 * we count it
+				 */
+				List<ActivityVO> dependenciesCopy = new ArrayList<ActivityVO>();
+				for (ActivityVO a : act.getDependencies()) {
+					ActivityVO aCopy = new ActivityVO(a);
+					dependenciesCopy.add(aCopy);
+				}
+				dependenciesCopy.removeAll(countedDependencies);
+				if (!countedDependencies.contains(act)) {
+					if (dependenciesCopy.isEmpty()) {
+						if (sum.plus(act.getEstimatedTime()).compareTo(limitDuration.plusSeconds(1)) > -1) {
+							if (!activitiesBlowLimitDuration)
+								continueWhile = false;
+							activitiesBlowLimitDuration = false;
+						} else {
+							sum = sum.plus(act.getEstimatedTime());
+							countedDependencies.add(act);
+						}
+					} else {
+						continue;
+					}
+				}
+
+			}
+			if (countedDependencies.size() == lstActivities.size()) {
+				continueWhile = false;
+			}
+		}
+		Object[] ob = { sum, countedDependencies.size() };
+		return ob;
+
 	}
 
 	private static ArrayList<OnActivityAddedI> activityAddedListeners = new ArrayList<OnActivityAddedI>();
 
 	public interface OnActivityAddedI {
-		void onActivityAddedI(ActivityVO act);
+		void onActivityAddedI(ActivityVO act, String action);
 	}
 
 	public static void addOnActivityAddedIListener(OnActivityAddedI newListener) {
@@ -139,9 +299,9 @@ public class ActivityBO {
 		activityAddedListeners.remove(newListener);
 	}
 
-	private void notifyAllActivityAddedListeners(ActivityVO act) {
+	private void notifyAllActivityAddedListeners(ActivityVO act, String action) {
 		for (OnActivityAddedI l : activityAddedListeners) {
-			l.onActivityAddedI(act);
+			l.onActivityAddedI(act, action);
 		}
 	}
 

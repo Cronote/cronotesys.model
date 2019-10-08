@@ -5,19 +5,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-
 import com.cronoteSys.model.dao.ProjectDAO;
-import com.cronoteSys.model.vo.ActivityVO;
 import com.cronoteSys.model.vo.ProjectVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 public class ProjectBO {
@@ -38,7 +30,7 @@ public class ProjectBO {
 			objProject = projectDAO.saveOrUpdate(objProject);
 
 		}
-		notifyAllProjectAddedListeners(objProject);
+		notifyAllProjectAddedListeners(objProject, "save");
 		return objProject;
 
 	}
@@ -47,9 +39,13 @@ public class ProjectBO {
 		objProject.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveProject", objProject).readEntity(String.class);
-			return (ProjectVO) GsonUtil.fromJsonAsStringToObject(json, ProjectVO.class);
+			objProject = (ProjectVO) GsonUtil.fromJsonAsStringToObject(json, ProjectVO.class);
+		} else {
+
+			objProject = projectDAO.saveOrUpdate(objProject);
 		}
-		return projectDAO.saveOrUpdate(objProject);
+		notifyAllProjectAddedListeners(objProject, "update");
+		return objProject;
 	}
 
 	public void delete(ProjectVO objProject) {
@@ -93,7 +89,7 @@ public class ProjectBO {
 	private static ArrayList<OnProjectAddedI> projectAddedListeners = new ArrayList<OnProjectAddedI>();
 
 	public interface OnProjectAddedI {
-		void onProjectAddedI(ProjectVO proj);
+		void onProjectAddedI(ProjectVO proj, String mode);
 	}
 
 	public static void addOnProjectAddedIListener(OnProjectAddedI newListener) {
@@ -104,9 +100,9 @@ public class ProjectBO {
 		projectAddedListeners.remove(newListener);
 	}
 
-	private void notifyAllProjectAddedListeners(ProjectVO act) {
+	private void notifyAllProjectAddedListeners(ProjectVO act, String mode) {
 		for (OnProjectAddedI l : projectAddedListeners) {
-			l.onProjectAddedI(act);
+			l.onProjectAddedI(act, mode);
 		}
 	}
 

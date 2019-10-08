@@ -2,7 +2,6 @@ package com.cronoteSys.model.dao;
 
 import java.util.List;
 
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 
 import com.cronoteSys.model.vo.LoginVO;
@@ -12,6 +11,19 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 
 	public LoginDAO() {
 		super(LoginVO.class);
+	}
+
+	public String getEmailFromUser(Integer userId) {
+		return entityManager.createQuery("Select l.email from LoginVO l where l.tbUser.id=" + userId).getResultList()
+				.get(0).toString();
+	}
+
+	public int changePassword(String email, String password) {
+		LoginVO l = (LoginVO) entityManager.createQuery("From LoginVO where email=:email", LoginVO.class)
+				.setParameter("email", email).getSingleResult();
+		l.setPasswd(password);
+		entityManager.merge(l);
+		return l.getIdLogin() != null ? 1 : 0;
 	}
 
 	public List<LoginVO> listAll() {
@@ -32,29 +44,25 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 
 	public UserVO verifiedUser(String email, String pass) {
 		try {
-			List<LoginVO> login = entityManager
-					.createNativeQuery("SELECT * FROM tb_login WHERE email  = '" + email + "';", LoginVO.class)
-					.getResultList();
-			if (login.size() > 0) {
-				if (login.get(0).getPasswd().equals(pass)) {
-					UserVO user = login.get(0).getTbUser();
-					Hibernate.initialize(user);
-					return user;
+			List<UserVO> user = entityManager.createQuery("from UserVO u where login.email = :email", UserVO.class)
+					.setParameter("email", email).getResultList();
+			if (user.size() > 0) {
+				if (user.get(0).getLogin().getPasswd().equals(pass)) {
+
+					return user.get(0);
 				}
 			}
 
 		} catch (Exception e) {
-			System.out.println("Erro de verificação de usuario: " + e.getMessage());
+			System.out.println("Erro de verificaï¿½ï¿½o de usuario: " + e.getMessage());
 		}
 		return null;
 	}
 
 	public Long loginExists(String sEmail) {
 		try {
-			return entityManager
-					.createQuery("SELECT count(l) FROM LoginVO l WHERE email =:email", Long.class)
-					.setParameter("email", sEmail)
-					.getSingleResult();
+			return entityManager.createQuery("SELECT count(l) FROM LoginVO l WHERE email =:email", Long.class)
+					.setParameter("email", sEmail).getSingleResult();
 
 		} catch (Exception e) {
 			System.out.println("Erro na verificaÃ§Ã£o de email: " + e.getMessage());
@@ -71,7 +79,7 @@ public class LoginDAO extends GenericsDAO<LoginVO, Integer> {
 			}
 
 		} catch (Exception e) {
-			System.out.println("Erro na verificação de Usuario: " + e.getMessage());
+			System.out.println("Erro na verificaï¿½ï¿½o de Usuario: " + e.getMessage());
 		}
 		return null;
 	}
