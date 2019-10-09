@@ -13,8 +13,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class RestUtil {
-	public static String host = "http://localhost:8080/myresource/";
-//	public static String host = "https://cronote-api.herokuapp.com/myresource/";
+//	public static String host = "http://localhost:8080/myresource/";
+	public static String host = "https://cronote-api.herokuapp.com/myresource/";
 
 	public static boolean isConnectedToTheServer() {
 		boolean connectionOK = false;
