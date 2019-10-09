@@ -3,19 +3,19 @@
         "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
         "http://hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
-    <session-factory>
-    <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-        <property name="hibernate.connection.url">jdbc:postgresql://ec2-54-225-76-136.compute-1.amazonaws.com:5432/d4qsjhnfa0emtb</property>
-        <property name="hibernate.connection.username">smktizssqpqobz</property>
-        <property name="hibernate.connection.password">7bdf4a0089a8691c1cba669fc0edb599c85d18549ab9bed0c8d09aa26d64b4ed</property>
-        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
-        <property name="hibernate.hbm2ddl.auto">update</property>
+	<session-factory>
+		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+		<property name="hibernate.connection.url">postgres://icowfbullsqzij:31befc28665481a9be4b2f8eb4a3cc7c92f552fd19986c420203fbef25d6ffe3@ec2-107-20-251-130.compute-1.amazonaws.com:5432/df7gvg8l8kbuaf</property>
+		<property name="hibernate.connection.username">icowfbullsqzij</property>
+		<property name="hibernate.connection.password">31befc28665481a9be4b2f8eb4a3cc7c92f552fd19986c420203fbef25d6ffe3</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+		<property name="hibernate.hbm2ddl.auto">update</property>
 
-        <mapping class="com.cronoteSys.model.vo.LoginVO" />
-        <mapping class="com.cronoteSys.model.vo.UserVO" />
-        <mapping class="com.cronoteSys.model.vo.ProjectVO" />
-        <mapping class="com.cronoteSys.model.vo.ActivityVO" />
-        <mapping class="com.cronoteSys.model.vo.CategoryVO" />
-        <mapping class="com.cronoteSys.model.vo.ExecutionTimeVO" />
-    </session-factory>
+		<mapping class="com.cronoteSys.model.vo.LoginVO" />
+		<mapping class="com.cronoteSys.model.vo.UserVO" />
+		<mapping class="com.cronoteSys.model.vo.ProjectVO" />
+		<mapping class="com.cronoteSys.model.vo.ActivityVO" />
+		<mapping class="com.cronoteSys.model.vo.CategoryVO" />
+		<mapping class="com.cronoteSys.model.vo.ExecutionTimeVO" />
+	</session-factory>
 </hibernate-configuration>
