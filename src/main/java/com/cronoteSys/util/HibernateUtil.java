@@ -28,11 +28,16 @@ public class HibernateUtil {
 			// config file.
 			sessionFactory = new Configuration().configure("hibernate-remote.cfg.xml").buildSessionFactory();
 			entityManager = sessionFactory.createEntityManager();
-		} catch (Throwable ex) {
+		} catch (Throwable ex1) {
 			// Log the exception.
-			System.err.println("Initial SessionFactory creation failed." + ex);
-			sessionFactory = new Configuration().configure("hibernate-local.cfg.xml").buildSessionFactory();
-			entityManager = sessionFactory.createEntityManager();
+			System.err.println("Initial SessionFactory creation failed." + ex1);
+			try {
+				sessionFactory = new Configuration().configure("hibernate-local1.cfg.xml").buildSessionFactory();
+				entityManager = sessionFactory.createEntityManager();
+			} catch (Exception ex2) {
+				System.err.println("Initial SessionFactory creation failed. >>>>>>>>>>> 2" + ex1);
+				// TODO: handle exception
+			}
 		}
 	}
 
