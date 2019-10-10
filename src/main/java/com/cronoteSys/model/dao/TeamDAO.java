@@ -1,6 +1,7 @@
 package com.cronoteSys.model.dao;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -86,10 +87,10 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 					System.out.println("member in the list of members ");
 
 					// if expiracao é antes de agora entao expirou
-					if (tu.getExpiresAt() != null && tu.getExpiresAt().isBefore(LocalDateTime.now())) {
+					if (tu.getExpiresAt() != null && tu.getExpiresAt().isBefore(LocalDateTime.now(ZoneId.of("UTC-03:00")))) {
 						
 						System.out.println("expires " + tu.getExpiresAt());
-						System.out.println("now" + LocalDateTime.now());
+						System.out.println("now" + LocalDateTime.now(ZoneId.of("UTC-03:00")));
 						System.out.println("invite broken");
 						expiredInvite = tu;
 						break;
