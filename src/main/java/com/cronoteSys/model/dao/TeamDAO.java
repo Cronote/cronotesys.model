@@ -87,6 +87,9 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 
 					// if expiracao é antes de agora entao expirou
 					if (tu.getExpiresAt() != null && tu.getExpiresAt().isBefore(LocalDateTime.now())) {
+						
+						System.out.println("expires " + tu.getExpiresAt());
+						System.out.println("now" + LocalDateTime.now());
 						System.out.println("invite broken");
 						expiredInvite = tu;
 						break;
