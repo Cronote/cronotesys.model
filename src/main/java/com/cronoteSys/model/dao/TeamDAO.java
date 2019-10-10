@@ -79,11 +79,15 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 			TeamVO t = entityManager.createQuery("select t from TeamVO t where t.id =" + team, TeamVO.class)
 					.getSingleResult();
 			TeamUser expiredInvite = null;
+			System.out.println("its null");
 			for (TeamUser tu : t.getTeamUser()) {
+				System.out.println("for");
 				if (tu.getMember().getIdUser() == member) {
+					System.out.println("member in the list of members ");
 
 					// if expiracao é antes de agora entao expirou
 					if (tu.getExpiresAt() != null && tu.getExpiresAt().isBefore(LocalDateTime.now())) {
+						System.out.println("invite broken");
 						expiredInvite = tu;
 						break;
 					} else {
@@ -99,7 +103,9 @@ public class TeamDAO extends GenericsDAO<TeamVO, Long> {
 						expiredInvite.getExpiresAt());
 				t.getMembers().remove(expiredMember);
 			}
+			System.out.println("antes do save " + expiredInvite);
 			t = saveOrUpdate(t);
+			System.out.println("depois do save " + expiredInvite);
 			return true && (expiredInvite == null);
 		} catch (HibernateException e) {
 			e.printStackTrace();
