@@ -15,7 +15,7 @@ public class ActivityMonitor {
 
 	private static List<ActivityVO> lstActivity = new ArrayList<ActivityVO>();
 
-	private static Timer timer = new Timer(1000, new ActionListener() {
+	private static Timer timer = new Timer(1000*60, new ActionListener() {
 
 		public void actionPerformed(java.awt.event.ActionEvent e) {
 			Platform.runLater(new Runnable() {

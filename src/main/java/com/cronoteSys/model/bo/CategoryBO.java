@@ -8,6 +8,7 @@ import javax.ws.rs.core.GenericType;
 import com.cronoteSys.model.dao.ActivityDAO;
 import com.cronoteSys.model.dao.CategoryDAO;
 import com.cronoteSys.model.vo.CategoryVO;
+import com.cronoteSys.model.vo.TeamVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
@@ -55,17 +56,31 @@ public class CategoryBO {
 			return false;
 		return true;
 	}
-	public List<CategoryVO> listByUser(UserVO user) {
+
+	public List<CategoryVO> listByUsers(String search, String users) {
 		if (RestUtil.isConnectedToTheServer()) {
-			String json = RestUtil.get("listCategoryByUser?userID="+user.getIdUser()).readEntity(String.class);
+			String json = RestUtil.get("listCategoryByUsers?search=" + search + "&users=" + users).readEntity(String.class);
 			Type categoryListType = new TypeToken<List<CategoryVO>>() {
 			}.getType();
-			
+
 			return GsonUtil.getGsonWithJavaTime().fromJson(json, categoryListType);
-			
+
+		}
+		return new CategoryDAO().listByDescriptionAndUser("", users);
+	}
+
+	public List<CategoryVO> listByUser(UserVO user) {
+		if (RestUtil.isConnectedToTheServer()) {
+			String json = RestUtil.get("listCategoryByUser?userID=" + user.getIdUser()).readEntity(String.class);
+			Type categoryListType = new TypeToken<List<CategoryVO>>() {
+			}.getType();
+
+			return GsonUtil.getGsonWithJavaTime().fromJson(json, categoryListType);
+
 		}
 		return new CategoryDAO().getList(user.getIdUser());
 	}
+
 	public List<CategoryVO> listAll() {
 		if (RestUtil.isConnectedToTheServer()) {
 			return RestUtil.get("listAllCategory").readEntity(new GenericType<List<CategoryVO>>() {

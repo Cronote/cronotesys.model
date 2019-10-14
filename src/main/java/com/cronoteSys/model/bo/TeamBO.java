@@ -146,6 +146,25 @@ public class TeamBO {
 		String rest = RestUtil.get("send_email?receivers=" + emailEncoder).readEntity(String.class);
 	}
 
+	public String getMemberIdArrayAsString(String loggedUserId, TeamVO team) {
+		String ids = "";
+		if (team != null) {
+			ids = "(" + team.getOwner().getIdUser();
+			if (team.getMembers().isEmpty()) {
+				ids += ")";
+			} else {
+				for (TeamMember tm : team.getMembers()) {
+					ids += "," + tm.getUser().getIdUser();
+				}
+				ids += ")";
+			}
+		} else {
+			ids += "(" + loggedUserId + ")";
+		}
+
+		return ids;
+	}
+
 	private static ArrayList<OnTeamAddedI> teamAddedListeners = new ArrayList<OnTeamAddedI>();
 
 	public interface OnTeamAddedI {
