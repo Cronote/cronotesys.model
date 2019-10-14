@@ -24,8 +24,8 @@ public class CategoryDAO extends GenericsDAO<CategoryVO, Integer> {
 
 	public List<CategoryVO> listByDescriptionAndUser(String descript, String user) {
 		return entityManager
-				.createQuery("From CategoryVO c where c.description like :desc and c.userVO.id in :user", CategoryVO.class)
-				.setParameter("desc", "%" + descript + "%").setParameter("user", user).getResultList();
+				.createQuery("From CategoryVO c where c.description like :desc and c.userVO.id IN "+user, CategoryVO.class)
+				.setParameter("desc", "%" + descript + "%").getResultList();
 	}
 	
 	
