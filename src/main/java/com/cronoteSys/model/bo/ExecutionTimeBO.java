@@ -48,10 +48,12 @@ public class ExecutionTimeBO {
 		} else {
 			executionTimeVO = execDAO.executionInProgress(ac.getId());
 		}
-		executionTimeVO.setFinishDate(LocalDateTime.now());
-		if (RestUtil.isConnectedToTheServer()) {
-			String json = RestUtil.post("saveExecutionTime", executionTimeVO).readEntity(String.class);
-			return (ExecutionTimeVO) GsonUtil.fromJsonAsStringToObject(json, ExecutionTimeVO.class);
+		if (executionTimeVO != null) {
+			executionTimeVO.setFinishDate(LocalDateTime.now());
+			if (RestUtil.isConnectedToTheServer()) {
+				String json = RestUtil.post("saveExecutionTime", executionTimeVO).readEntity(String.class);
+				return (ExecutionTimeVO) GsonUtil.fromJsonAsStringToObject(json, ExecutionTimeVO.class);
+			}
 		}
 		return execDAO.saveOrUpdate(executionTimeVO);
 	}

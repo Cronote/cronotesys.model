@@ -17,7 +17,6 @@ import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sun.mail.imap.protocol.Status;
 
 public class ActivityBO {
 	ActivityDAO acDAO;
@@ -88,14 +87,21 @@ public class ActivityBO {
 	}
 
 	public ActivityVO switchStatus(ActivityVO ac, StatusEnum stats) {
+		if (StatusEnum.inProgress(ac.getStats()) && !StatusEnum.inProgress(stats))
+			new ExecutionTimeBO().finishExecution(ac);
 		ac.setStats(stats);
 		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
 			return breakStatus(ac);
+
+		ActivityVO act = null;
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveActivity", ac).readEntity(String.class);
-			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+			act = (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+		} else {
+			act = acDAO.saveOrUpdate(ac);
 		}
-		return acDAO.saveOrUpdate(ac);
+
+		return act;
 	}
 
 	public ActivityVO updateRealTime(ActivityVO ac) {
