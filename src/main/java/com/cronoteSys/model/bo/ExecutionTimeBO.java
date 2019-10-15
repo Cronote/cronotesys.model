@@ -54,8 +54,11 @@ public class ExecutionTimeBO {
 				String json = RestUtil.post("saveExecutionTime", executionTimeVO).readEntity(String.class);
 				return (ExecutionTimeVO) GsonUtil.fromJsonAsStringToObject(json, ExecutionTimeVO.class);
 			}
+
+			return execDAO.saveOrUpdate(executionTimeVO);
+		} else {
+			return null;
 		}
-		return execDAO.saveOrUpdate(executionTimeVO);
 	}
 
 	public Duration getRealTime(ActivityVO act) {
