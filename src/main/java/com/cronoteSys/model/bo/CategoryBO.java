@@ -1,47 +1,62 @@
 package com.cronoteSys.model.bo;
 
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.ws.rs.core.GenericType;
 
 import com.cronoteSys.model.dao.ActivityDAO;
+import com.cronoteSys.model.dao.AuditLogDAO;
 import com.cronoteSys.model.dao.CategoryDAO;
+import com.cronoteSys.model.interfaces.DatabaseLog;
+import com.cronoteSys.model.vo.AuditLogVO;
 import com.cronoteSys.model.vo.CategoryVO;
-import com.cronoteSys.model.vo.TeamVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 import com.google.gson.reflect.TypeToken;
 
-public class CategoryBO {
+public class CategoryBO implements DatabaseLog {
 
 	public CategoryBO() {
 
 	}
 
+	@Override
+	public void saveLog(String operation, Object obj) {
+		CategoryVO cat = (CategoryVO) obj;
+		AuditLogVO audit = new AuditLogVO();
+		audit.setAction(operation);
+		audit.setTablename("tb_category");
+		audit.setUser(cat.getUserVO());
+		audit.setDateTime(LocalDateTime.now());
+		new AuditLogDAO().saveOrUpdate(audit);
+
+	}
+
 	public CategoryVO save(CategoryVO categoryVO) {
+		String operation = categoryVO.getId() == null ? "Insert" : "update";
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveCategory", categoryVO).readEntity(String.class);
 
-			return (CategoryVO) GsonUtil.fromJsonAsStringToObject(json, CategoryVO.class);
+			categoryVO = (CategoryVO) GsonUtil.fromJsonAsStringToObject(json, CategoryVO.class);
+		} else {
+			categoryVO = new CategoryDAO().saveOrUpdate(categoryVO);
+
 		}
-		return new CategoryDAO().saveOrUpdate(categoryVO);
+		saveLog(operation, categoryVO);
+		return categoryVO;
 	}
 
-	public void update(CategoryVO categoryVO) {
-		if (RestUtil.isConnectedToTheServer()) {
-			RestUtil.post("saveCategory", categoryVO);
-		} else {
-			new CategoryDAO().saveOrUpdate(categoryVO);
-		}
-	}
 
 	public void delete(CategoryVO categoryVO) {
 		if (RestUtil.isConnectedToTheServer()) {
 			RestUtil.delete("deleteCategory", categoryVO.getId());
+		} else {
+			new CategoryDAO().delete(categoryVO.getId());
 		}
-		new CategoryDAO().delete(categoryVO.getId());
+		saveLog("Delete", categoryVO);
 	}
 
 	public boolean canBeDeleted(CategoryVO categoryVO) {
@@ -59,7 +74,8 @@ public class CategoryBO {
 
 	public List<CategoryVO> listByUsers(String search, String users) {
 		if (RestUtil.isConnectedToTheServer()) {
-			String json = RestUtil.get("listCategoryByUsers?search=" + search + "&users=" + users).readEntity(String.class);
+			String json = RestUtil.get("listCategoryByUsers?search=" + search + "&users=" + users)
+					.readEntity(String.class);
 			Type categoryListType = new TypeToken<List<CategoryVO>>() {
 			}.getType();
 
@@ -88,4 +104,5 @@ public class CategoryBO {
 		}
 		return new CategoryDAO().getList();
 	}
+
 }

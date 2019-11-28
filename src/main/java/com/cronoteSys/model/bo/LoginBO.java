@@ -5,9 +5,13 @@
  */
 package com.cronoteSys.model.bo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import com.cronoteSys.model.dao.AuditLogDAO;
 import com.cronoteSys.model.dao.LoginDAO;
+import com.cronoteSys.model.interfaces.DatabaseLog;
+import com.cronoteSys.model.vo.AuditLogVO;
 import com.cronoteSys.model.vo.LoginVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GenHash;
@@ -18,23 +22,40 @@ import com.cronoteSys.util.RestUtil;
  *
  * @author bruno
  */
-public class LoginBO {
+public class LoginBO implements DatabaseLog {
+	@Override
+	public void saveLog(String operation, Object obj) {
+
+		AuditLogVO audit = new AuditLogVO();
+		audit.setTablename("tb_user");
+		audit.setDateTime(LocalDateTime.now());
+		audit.setAction(operation);
+		audit.setUser((UserVO) obj);
+
+		new AuditLogDAO().saveOrUpdate(audit);
+	}
 
 	public LoginVO save(LoginVO login) {
+		login.setEmail(login.getEmail().toLowerCase());
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveLogin", login).readEntity(String.class);
-			return (LoginVO) GsonUtil.fromJsonAsStringToObject(json, LoginVO.class);
+			login = (LoginVO) GsonUtil.fromJsonAsStringToObject(json, LoginVO.class);
 		} else {
-			return new LoginDAO().saveOrUpdate(login);
+			login = new LoginDAO().saveOrUpdate(login);
 		}
+
+		saveLog("Insert", null);
+		return login;
 	}
 
 	public void update(LoginVO login) {
 		new LoginDAO().saveOrUpdate(login);
+		saveLog("update", null);
 	}
 
 	public void delete(LoginVO login) {
 		new LoginDAO().delete(login.getIdLogin());
+		saveLog("delete", null);
 	}
 
 	public List<LoginVO> listAll() {
@@ -49,33 +70,42 @@ public class LoginBO {
 		} else {
 			user = new LoginDAO().verifiedUser(login.getEmail(), login.getPasswd());
 		}
-
+		if (user != null) {
+			saveLog("User logged in > id: " + user.getLogin().getIdLogin(), user);
+		}
 		return (user != null && user.getStats() == 1) ? user : null;
 	}
 
 	public Long loginExists(String sEmail) {
+		Long result = 0L;
 		if (RestUtil.isConnectedToTheServer()) {
 			String resp = RestUtil.get("email_exists?email=" + sEmail).readEntity(String.class);
-			return Long.valueOf(resp);
+			result = Long.valueOf(resp);
+		} else {
+			result = new LoginDAO().loginExists(sEmail);
 		}
-		return new LoginDAO().loginExists(sEmail);
+
+		return result;
 	}
 
-	//XXX: not working
+	// XXX: not working
 	public LoginVO getLogin(UserVO user) {
 		return new LoginDAO().loginByUser(user);
 	}
 
 	public boolean changePassword(String email, String sPassPureText) {
 		String passwordEncrypted = new GenHash().hashIt(sPassPureText);
+		boolean result = false;
 		if (RestUtil.isConnectedToTheServer()) {
 			String infos = email + ";" + passwordEncrypted;
 			String json = RestUtil.post("passwordChange", infos).readEntity(String.class);
 			Integer p = (Integer) GsonUtil.fromJsonAsStringToObject(json, Integer.class);
 
-			return p > 0;
+			result = p > 0;
 		} else {
-			return new LoginDAO().changePassword(email, passwordEncrypted) > 0;
+			result = new LoginDAO().changePassword(email, passwordEncrypted) > 0;
 		}
+		saveLog("update - password change", null);
+		return result;
 	}
 }

@@ -5,16 +5,29 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cronoteSys.model.dao.AuditLogDAO;
 import com.cronoteSys.model.dao.ProjectDAO;
+import com.cronoteSys.model.interfaces.DatabaseLog;
+import com.cronoteSys.model.vo.AuditLogVO;
 import com.cronoteSys.model.vo.ProjectVO;
 import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 import com.google.gson.reflect.TypeToken;
 
-public class ProjectBO {
+public class ProjectBO implements DatabaseLog {
 
 	ProjectDAO projectDAO;
+
+	@Override
+	public void saveLog(String operation, Object obj) {
+		AuditLogVO audit = new AuditLogVO();
+		audit.setAction(operation);
+		audit.setDateTime(LocalDateTime.now());
+		audit.setTablename("tb_product");
+		audit.setUser((UserVO) obj);
+		new AuditLogDAO().saveOrUpdate(audit);
+	}
 
 	public ProjectBO() {
 		projectDAO = new ProjectDAO();
@@ -31,11 +44,12 @@ public class ProjectBO {
 
 		}
 		notifyAllProjectAddedListeners(objProject, "save");
+		saveLog("Insert", objProject.getUserVO());
 		return objProject;
 
 	}
 
-	public ProjectVO update(ProjectVO objProject) {
+	public ProjectVO update(ProjectVO objProject, UserVO user) {
 		objProject.setLastModification(LocalDateTime.now());
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveProject", objProject).readEntity(String.class);
@@ -45,10 +59,11 @@ public class ProjectBO {
 			objProject = projectDAO.saveOrUpdate(objProject);
 		}
 		notifyAllProjectAddedListeners(objProject, "update");
+		saveLog("update", user);
 		return objProject;
 	}
 
-	public void delete(ProjectVO objProject) {
+	public void delete(ProjectVO objProject, UserVO user) {
 		int projectID = objProject.getId();
 		if (projectID == 0)
 			return;
@@ -58,6 +73,7 @@ public class ProjectBO {
 			projectDAO.delete(projectID);
 		}
 		notifyAllProjectDeletedListeners(objProject);
+		saveLog("delete", user);
 	}
 
 	public List<ProjectVO> listAll(UserVO user) {
@@ -76,14 +92,14 @@ public class ProjectBO {
 		return projects;
 	}
 
-	public void lastModificationToNow(ProjectVO objProject) {
+	public void lastModificationToNow(ProjectVO objProject, UserVO user) {
 		objProject.setLastModification(LocalDateTime.now());
-		update(objProject);
+		update(objProject, user);
 	}
 
-	public void changeStatus(ProjectVO objProject, int status) {
+	public void changeStatus(ProjectVO objProject, int status, UserVO user) {
 		objProject.setStats(status);
-		update(objProject);
+		update(objProject, user);
 	}
 
 	private static ArrayList<OnProjectAddedI> projectAddedListeners = new ArrayList<OnProjectAddedI>();
@@ -125,4 +141,5 @@ public class ProjectBO {
 			l.onProjectDeleted(proj);
 		}
 	}
+
 }

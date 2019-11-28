@@ -16,6 +16,7 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.service.ServiceRegistry;
 
 import com.cronoteSys.model.vo.ActivityVO;
+import com.cronoteSys.model.vo.AuditLogVO;
 import com.cronoteSys.model.vo.CategoryVO;
 import com.cronoteSys.model.vo.ExecutionTimeVO;
 import com.cronoteSys.model.vo.LoginVO;
@@ -46,6 +47,8 @@ public class HibernateUtil {
 				settings.put(Environment.DRIVER, "org.postgresql.Driver");
 				settings.put(Environment.URL,
 						"jdbc:postgresql://ec2-107-20-251-130.compute-1.amazonaws.com:5432/df7gvg8l8kbuaf");
+				/*settings.put(Environment.URL,
+						"jdbc:postgresql://localhost:5432/MYAPP");*/
 				settings.put(Environment.USER, "icowfbullsqzij");
 				settings.put(Environment.PASS, "31befc28665481a9be4b2f8eb4a3cc7c92f552fd19986c420203fbef25d6ffe3");
 				settings.put(Environment.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
@@ -62,13 +65,14 @@ public class HibernateUtil {
 				configuration.addAnnotatedClass(ActivityVO.class);
 				configuration.addAnnotatedClass(ExecutionTimeVO.class);
 				configuration.addAnnotatedClass(TeamUser.class);
+				configuration.addAnnotatedClass(AuditLogVO.class);
 
 				ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
 						.applySettings(configuration.getProperties()).build();
 
 				sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 			} catch (Exception e) {
-				System.out.println("Deu erro nessa porra");
+				System.out.println("Error at connection ");
 				e.printStackTrace();
 			}
 		}

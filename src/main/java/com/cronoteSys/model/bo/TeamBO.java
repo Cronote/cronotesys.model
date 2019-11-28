@@ -11,8 +11,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cronoteSys.model.dao.AuditLogDAO;
 import com.cronoteSys.model.dao.ProjectDAO;
 import com.cronoteSys.model.dao.TeamDAO;
+import com.cronoteSys.model.interfaces.DatabaseLog;
+import com.cronoteSys.model.vo.AuditLogVO;
 import com.cronoteSys.model.vo.EmailVO;
 import com.cronoteSys.model.vo.TeamUser;
 import com.cronoteSys.model.vo.TeamVO;
@@ -27,7 +30,18 @@ import com.google.gson.reflect.TypeToken;
  *
  * @author bruno
  */
-public class TeamBO {
+public class TeamBO implements DatabaseLog {
+	@Override
+	public void saveLog(String operation, Object obj) {
+		UserVO user = (UserVO) obj;
+		AuditLogVO audit = new AuditLogVO();
+		audit.setAction(operation);
+		audit.setUser(user);
+		audit.setTablename("tb_team");
+		audit.setDateTime(LocalDateTime.now());
+		new AuditLogDAO().saveOrUpdate(audit);
+
+	}
 
 	public void save(TeamVO team) {
 
@@ -38,6 +52,7 @@ public class TeamBO {
 			team = new TeamDAO().saveOrUpdate(team);
 		}
 		sendEmail(team);
+		saveLog("save", team.getOwner());
 		notifyAllTeamAddedListeners(team, "added");
 	}
 
@@ -49,26 +64,30 @@ public class TeamBO {
 			team = new TeamDAO().saveOrUpdate(team);
 		}
 		sendEmail(team);
+		saveLog("update", team.getOwner());
 		notifyAllTeamAddedListeners(team, "updated");
 	}
 
-	public void update(TeamVO team, String action) {
+	public void update(TeamVO team, String action, UserVO user) {
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveTeam", team).readEntity(String.class);
 			team = (TeamVO) GsonUtil.fromJsonAsStringToObject(json, TeamVO.class);
 		} else {
 			team = new TeamDAO().saveOrUpdate(team);
 		}
-		if (action.equals("leaving"))
+		if (action.equals("leaving")) {
+			saveLog("update - leaving", user);
 			notifyAllTeamDeletedListeners(team);
+		}
 	}
 
-	public void delete(TeamVO team) {
+	public void delete(TeamVO team, UserVO user) {
 		if (RestUtil.isConnectedToTheServer()) {
 			RestUtil.delete("deleteTeam", team.getId());
 		} else {
 			new TeamDAO().delete(team.getId());
 		}
+		saveLog("delete", user);
 		notifyAllTeamDeletedListeners(team);
 	}
 

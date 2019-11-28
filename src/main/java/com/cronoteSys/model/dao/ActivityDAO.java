@@ -90,6 +90,12 @@ public class ActivityDAO extends GenericsDAO<ActivityVO, Integer> {
 			} else {
 				p.add(builder.isNull(root.get("projectVO")));
 			}
+			if (filter.getCategory() != null) {
+				p.add(builder.equal(root.get("categoryVO"), filter.getCategory()));
+			}
+			if (filter.getPriority() != null) {
+				p.add(builder.equal(root.get("priority"), filter.getPriority()));
+			}
 			return builder.and(p.toArray(new Predicate[p.size()]));
 		}
 		return null;

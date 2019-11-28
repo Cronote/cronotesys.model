@@ -11,15 +11,30 @@ import java.util.function.Predicate;
 
 import com.cronoteSys.filter.ActivityFilter;
 import com.cronoteSys.model.dao.ActivityDAO;
+import com.cronoteSys.model.dao.AuditLogDAO;
+import com.cronoteSys.model.interfaces.DatabaseLog;
 import com.cronoteSys.model.vo.ActivityVO;
+import com.cronoteSys.model.vo.AuditLogVO;
+import com.cronoteSys.model.vo.CategoryVO;
 import com.cronoteSys.model.vo.StatusEnum;
+import com.cronoteSys.model.vo.UserVO;
 import com.cronoteSys.util.GsonUtil;
 import com.cronoteSys.util.RestUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-public class ActivityBO {
+public class ActivityBO implements DatabaseLog {
 	ActivityDAO acDAO;
+
+	@Override
+	public void saveLog(String operation, Object obj) {
+		AuditLogVO audit = new AuditLogVO();
+		audit.setAction(operation);
+		audit.setDateTime(LocalDateTime.now());
+		audit.setTablename("tb_activity");
+		audit.setUser((UserVO) obj);
+		new AuditLogDAO().saveOrUpdate(audit);
+	}
 
 	public ActivityBO() {
 		acDAO = new ActivityDAO();
@@ -38,6 +53,7 @@ public class ActivityBO {
 			activityVO = acDAO.saveOrUpdate(activityVO);
 		}
 		notifyAllActivityAddedListeners(activityVO, "save");
+		saveLog("Insert", activityVO.getUserVO());
 		return activityVO;
 	}
 
@@ -49,6 +65,7 @@ public class ActivityBO {
 			activityVO = acDAO.saveOrUpdate(activityVO);
 		}
 		notifyAllActivityAddedListeners(activityVO, "update");
+		saveLog("update", activityVO.getUserVO());
 		return activityVO;
 	}
 
@@ -59,6 +76,8 @@ public class ActivityBO {
 		} else {
 			acDAO.delete(activityVO.getId());
 		}
+
+		saveLog("delete", activityVO.getUserVO());
 		notifyAllactivityDeletedListeners(activityVO);
 	}
 
@@ -81,14 +100,17 @@ public class ActivityBO {
 		ac.setStats(stats);
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveActivity", ac).readEntity(String.class);
-			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+			ac = (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+		} else {
+			ac = acDAO.saveOrUpdate(ac);
 		}
-		return acDAO.saveOrUpdate(ac);
+		saveLog("update - status breaked", ac.getUserVO());
+		return ac;
 	}
 
-	public ActivityVO switchStatus(ActivityVO ac, StatusEnum stats) {
+	public ActivityVO switchStatus(ActivityVO ac, StatusEnum stats, UserVO executor) {
 		if (StatusEnum.inProgress(ac.getStats()) && !StatusEnum.inProgress(stats))
-			new ExecutionTimeBO().finishExecution(ac);
+			new ExecutionTimeBO().finishExecution(ac, executor);
 		ac.setStats(stats);
 		if (ac.getRealtime().compareTo(ac.getEstimatedTime()) > 0)
 			return breakStatus(ac);
@@ -100,7 +122,7 @@ public class ActivityBO {
 		} else {
 			act = acDAO.saveOrUpdate(ac);
 		}
-
+		saveLog("update - status changed", ac.getUserVO());
 		return act;
 	}
 
@@ -111,10 +133,12 @@ public class ActivityBO {
 			ac = breakStatus(ac);
 		if (RestUtil.isConnectedToTheServer()) {
 			String json = RestUtil.post("saveActivity", ac).readEntity(String.class);
-			return (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+			ac = (ActivityVO) GsonUtil.fromJsonAsStringToObject(json, ActivityVO.class);
+		} else {
+			ac = acDAO.saveOrUpdate(ac);
 		}
-		return acDAO.saveOrUpdate(ac);
-
+		saveLog("update - realtime", ac.getUserVO());
+		return ac;
 	}
 
 	public List<ActivityVO> listAll(ActivityFilter filter) {
@@ -291,6 +315,23 @@ public class ActivityBO {
 
 	}
 
+	public Duration timeSuggestionFor(Integer user,Integer priority, CategoryVO category) {
+		ActivityFilter filter = new ActivityFilter(null, null, user, category.getId(), priority);
+		List<ActivityVO> lstMatchedItems = listAll(filter);
+		if (lstMatchedItems.size() >= 3) {
+			Duration d = Duration.ZERO;
+			for (ActivityVO act : lstMatchedItems) {
+				d = d.plus(act.getRealtime());
+
+			}
+
+			d = d.dividedBy(lstMatchedItems.size());
+			return d;
+		}
+
+		return null;
+	}
+
 	private static ArrayList<OnActivityAddedI> activityAddedListeners = new ArrayList<OnActivityAddedI>();
 
 	public interface OnActivityAddedI {
@@ -330,4 +371,5 @@ public class ActivityBO {
 			l.onActivityDeleted(act);
 		}
 	}
+
 }
